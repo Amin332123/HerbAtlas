@@ -17,6 +17,31 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+
+
+    public function role() {
+        return $this->hasOne(Role::class);
+    }
+
+
+    public function reports() {
+        return $this->hasMany(Report::class);
+
+    }
+
+
+    public function picture() {
+        return $this->hasOne(Picture::class);
+    }
+
+    public function orders() {
+        return $this->hasMany(Order::class);
+    }
+
+    public function feedbacks() {
+        return $this->hasMany(Feedback::class);
+    }
+
     protected $fillable = [
         'name',
         'email',
