@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome Back</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --teal: #66bfbf;
@@ -43,9 +46,17 @@
         }
 
         @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         /* Floating geometric shapes */
@@ -96,15 +107,20 @@
         }
 
         @keyframes floatShape {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translate(0, 0) rotate(0deg) scale(1);
             }
+
             25% {
                 transform: translate(30px, -30px) rotate(90deg) scale(1.1);
             }
+
             50% {
                 transform: translate(-20px, 40px) rotate(180deg) scale(0.9);
             }
+
             75% {
                 transform: translate(40px, 20px) rotate(270deg) scale(1.05);
             }
@@ -117,7 +133,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
+            background-image:
                 linear-gradient(rgba(102, 191, 191, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(102, 191, 191, 0.03) 1px, transparent 1px);
             background-size: 50px 50px;
@@ -125,8 +141,13 @@
         }
 
         @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(50px, 50px);
+            }
         }
 
         /* Container */
@@ -149,7 +170,7 @@
             width: 100%;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            box-shadow: 
+            box-shadow:
                 0 50px 100px rgba(102, 191, 191, 0.2),
                 0 0 0 1px rgba(255, 255, 255, 0.5);
             animation: cardEntrance 1s ease-out;
@@ -160,6 +181,7 @@
                 opacity: 0;
                 transform: translateY(50px) scale(0.95);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
@@ -184,14 +206,19 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
             background-size: 30px 30px;
             animation: rotatePattern 30s linear infinite;
         }
 
         @keyframes rotatePattern {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .decoration-content {
@@ -206,7 +233,7 @@
             font-weight: 900;
             margin-bottom: 2rem;
             letter-spacing: -2px;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             animation: fadeInLeft 1s ease-out 0.3s backwards;
         }
 
@@ -235,6 +262,7 @@
                 opacity: 0;
                 transform: translateX(-30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -265,8 +293,17 @@
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.2; }
-            50% { transform: scale(1.1); opacity: 0.3; }
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.2;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.3;
+            }
         }
 
         /* Right side - Form */
@@ -283,6 +320,7 @@
                 opacity: 0;
                 transform: translateX(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -355,7 +393,7 @@
             transform: translateY(-2px);
         }
 
-        input:focus + .input-icon {
+        input:focus+.input-icon {
             opacity: 0.8;
             transform: translateY(-50%) scale(1.1);
         }
@@ -421,7 +459,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transition: left 0.5s ease;
         }
 
@@ -567,7 +605,9 @@
 
         /* Loading animation for button */
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .submit-btn.loading::after {
@@ -579,13 +619,14 @@
             left: 50%;
             margin-left: -10px;
             margin-top: -10px;
-            border: 3px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s linear infinite;
         }
     </style>
 </head>
+
 <body>
     <div class="background">
         <div class="grid-overlay"></div>
@@ -615,13 +656,16 @@
                     <p>Enter your credentials to access your account</p>
                 </div>
 
-                <form id="loginForm">
+                <form id="loginForm" action="{{ route('login.store') }}" method="post">
+                    @csrf
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <div class="input-wrapper">
                             <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
-                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
                                 <polyline points="22,6 12,13 2,6"></polyline>
                             </svg>
                         </div>
@@ -630,15 +674,29 @@
                     <div class="form-group">
                         <label for="password">Password</label>
                         <div class="input-wrapper">
-                            <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <input type="password" id="password" name="password" placeholder="Enter your password"
+                                required>
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                             </svg>
                         </div>
+                        
                         <div class="forgot-password">
                             <a href="#" class="forgot-link">Forgot password?</a>
                         </div>
+
+                        @if ($errors->any())
+                            <div style="color: red; border: red; padding: 10px;">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                     </div>
 
                     <button type="submit" class="submit-btn">Login</button>
@@ -647,8 +705,10 @@
                         <span>OR</span>
                     </div>
 
+
                     <div class="signup-section">
-                        <p>Don't have an account? <a href="signup-page.html" class="signup-link">Sign up</a></p>
+                        <p>Don't have an account? <a href="{{ route('register.show') }}" class="signup-link">Sign up</a>
+                        </p>
                     </div>
                 </form>
             </div>
@@ -656,32 +716,20 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const btn = this.querySelector('.submit-btn');
-            btn.classList.add('loading');
-            btn.textContent = '';
-            
-            // Simulate login process
-            setTimeout(() => {
-                btn.classList.remove('loading');
-                btn.textContent = 'LOGIN';
-                alert('Login successful!');
-            }, 2000);
-        });
+
 
         // Add floating animation to input icons
         const inputs = document.querySelectorAll('input');
         inputs.forEach(input => {
-            input.addEventListener('focus', function() {
+            input.addEventListener('focus', function () {
                 this.parentElement.querySelector('.input-icon').style.color = 'var(--teal)';
             });
-            
-            input.addEventListener('blur', function() {
+
+            input.addEventListener('blur', function () {
                 this.parentElement.querySelector('.input-icon').style.color = '';
             });
         });
     </script>
 </body>
+
 </html>

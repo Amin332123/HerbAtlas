@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
+
+use App\Http\Requests\LoginRequest;
 class AuthController extends Controller
 {
     public function showRegister()
@@ -45,6 +47,34 @@ class AuthController extends Controller
 
         return back()->with('message', 'Verification link sent!');
 
+    }
+
+
+    // login code : 
+
+    public function login(LoginRequest $request)
+    {
+
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+
+
+            $request->session()->regenerate();
+
+
+            return redirect()->route('dashboard');
+        }
+
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
+    }
+
+
+    public function showLogin() {
+        return view('Auth.login');
     }
 
 }
