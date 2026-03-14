@@ -404,7 +404,7 @@
 
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" placeholder="john.doe@example.com" required>
+                    <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="john.doe@example.com" required>
                 </div>
 
                 <div class="form-group">
