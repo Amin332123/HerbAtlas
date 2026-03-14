@@ -417,9 +417,12 @@
             <a href="{{ route('order.show') }}" class="nav-link">My Orders</a>
             <a href="{{ route('product.show') }}" class="nav-link">Products</a>
             <a href="chat.html" class="nav-link">Chat</a>
-            <a href="home-page.html ">
-                 <button class="logout-btn">Log Out</button>
-            </a>
+            
+            <form action="{{ route('logout') }}" method="post">
+                @csrf
+                 <button type="submit" class="logout-btn">Log Out</button>
+            </form>
+            
         </nav>
     </header>
 

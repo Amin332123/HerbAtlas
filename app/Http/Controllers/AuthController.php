@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Http\Requests\LogoutRequest;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Requests\RegisterRequest;
@@ -75,6 +77,17 @@ class AuthController extends Controller
 
     public function showLogin() {
         return view('Auth.login');
+    }
+
+
+
+    public function logout(LogoutRequest $request) {
+        Auth::logout();
+
+        $request->session()->flush();
+        $request->session()->regenerateToken();
+
+        return redirect('/');
     }
 
 }

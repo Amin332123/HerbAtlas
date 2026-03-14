@@ -980,7 +980,7 @@
             <div class="logo-text">Herb Atlas</div>
         </div>
         <div class="nav-buttons">
-            <a href="{{ route('login.show') }}" class="nav-btn btn-login">Login</a>
+            <a href="{{ route('login') }}" class="nav-btn btn-login">Login</a>
             <a href="{{ route('register.show') }}" class="nav-btn btn-signup">Sign Up</a>
         </div>
     </nav>
