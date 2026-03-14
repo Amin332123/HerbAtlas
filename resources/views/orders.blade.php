@@ -71,20 +71,7 @@
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="logo-container">
-            <div class="logo-icon">HA</div>
-            <div class="logo-text">Herb Atlas</div>
-        </div>
-        <nav class="nav-menu">
-            <a href="dashboard.html" class="nav-link">Dashboard</a>
-            <a href="profile.html" class="nav-link">Profile</a>
-            <a href="my-orders.html" class="nav-link active">My Orders</a>
-            <a href="products.html" class="nav-link">Products</a>
-            <a href="chat.html" class="nav-link">Chat</a>
-            <button class="logout-btn">Log Out</button>
-        </nav>
-    </header>
+    <x-header />
     <main class="main-content">
         <section class="search-section">
             <div class="search-bar">
