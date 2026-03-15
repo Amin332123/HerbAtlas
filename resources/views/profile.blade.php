@@ -334,6 +334,77 @@
             cursor: pointer;
         }
 
+        .avatar-wrapper {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid white;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .avatar-wrapper:hover {
+            transform: scale(1.02);
+        }
+
+        .avatar-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(45, 55, 72, 0.6);
+            /* Your dark teal/gray theme */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .avatar-wrapper:hover .upload-overlay {
+            opacity: 1;
+        }
+
+        .upload-overlay i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .save-photo-btn {
+            margin-top: 15px;
+            padding: 8px 20px;
+            background-color: var(--teal);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @media (max-width: 640px) {
             .header {
                 padding: 15px 20px;
@@ -381,8 +452,35 @@
 
         <p id="responseFromBackend"></p>
         <div class="profile-header">
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop"
-                class="profile-image">
+            <div class="profile-image-container">
+                <form action="{{ route('profileImage.update') }}" method="POST" enctype="multipart/form-data"
+                    id="imageUploadForm">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="avatar-wrapper">
+                        <img id="avatar-preview"
+                            src="{{ $user->picture ? asset('storage/' . $user->picture->img_path) : 'https://ui-avatars.com/api/?background=random&name=' . $user->firstName . ' ' . $user->lastName }}"
+                            alt="Profile Picture">
+
+                        <label for="file-input" class="upload-overlay">
+                            <i class="fas fa-camera"></i>
+                            <span>Change Photo</span>
+                        </label>
+
+                        <input id="file-input" type="file" name="photo" accept="image/*" onchange="previewImage(event)"
+                            style="display: none;" />
+                    </div>
+
+                    <button type="submit" id="save-photo-btn" class="save-photo-btn" style="display: none;">
+                        Save New Photo
+                    </button>
+
+
+                    <span id="imgerror" style="color:red;"></span>
+                </form>
+            </div>
+
             <div>
                 <h1 class="profile-name">{{ $user->firstName }} {{ $user->lastName }}</h1>
                 <p class="profile-email">{{ $user->email }}</p>
@@ -604,7 +702,7 @@
                 if (iti.isValidNumber()) {
                     const fullNumber = iti.getNumber();
                     document.getElementById('hiddenPhoneValue').value = fullNumber;
-                    
+
                     // AJAX Submit to avoid 302 Redirect
                     fetch("{{ route('profilePhone.update') }}", {
                         method: 'POST',
@@ -618,21 +716,21 @@
                             phone_number: fullNumber
                         })
                     })
-                    .then(async response => {
-                        const data = await response.json();
-                        if (!response.ok) throw data;
-                        return data;
-                    })
-                    .then(data => {
-                        document.getElementById('phoneDisplay').textContent = fullNumber;
-                        document.getElementById('responseFromBackend').innerText = data.message;
-                        closeModal('phoneModal');
-                        // Clear success message after 3 seconds
-                        setTimeout(() => document.getElementById('responseFromBackend').innerText = "", 3000);
-                    })
-                    .catch(error => {
-                        errorMsg.innerHTML = error.errors?.phone_number ? error.errors.phone_number[0] : (error.message || "An error occurred");
-                    });
+                        .then(async response => {
+                            const data = await response.json();
+                            if (!response.ok) throw data;
+                            return data;
+                        })
+                        .then(data => {
+                            document.getElementById('phoneDisplay').textContent = fullNumber;
+                            document.getElementById('responseFromBackend').innerText = data.message;
+                            closeModal('phoneModal');
+                            // Clear success message after 3 seconds
+                            setTimeout(() => document.getElementById('responseFromBackend').innerText = "", 3000);
+                        })
+                        .catch(error => {
+                            errorMsg.innerHTML = error.errors?.phone_number ? error.errors.phone_number[0] : (error.message || "An error occurred");
+                        });
                 } else {
                     errorMsg.innerHTML = "Please enter a valid phone number.";
                     return;
@@ -730,6 +828,34 @@
 
 
 
+        }
+
+
+
+        // profile pic :
+
+        function previewImage(event) {
+            document.getElementById('imgerror').innerHTML = " ";
+           
+            const reader = new FileReader();
+            const preview = document.getElementById('avatar-preview');
+            const saveBtn = document.getElementById('save-photo-btn');
+             saveBtn.style.display = 'none';
+
+            reader.onload = function () {
+                if (reader.readyState === 2) {
+                    preview.src = reader.result;
+                    saveBtn.style.display = 'inline-block';
+                }
+            }
+
+            if (event.target.files[0]) {
+                if (event.target.files[0].size > 2 * 1024 * 1024) {
+                    document.getElementById('imgerror').innerHTML = "This file is too big! Please choose an image under 2MB.";
+                    return;
+                }
+                reader.readAsDataURL(event.target.files[0]);
+            }
         }
 
 

@@ -35,11 +35,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [UserController::class, 'index'])->name('dashboard');
     Route::get('/products', [ProductController::class, 'index'])->name('product.show');
     Route::get('/order', [OrderController::class, 'index'])->name('order.show');
+
+
+    
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.show');
     Route::put('/profile/name', [ProfileController::class, 'updateName'])->name('profileName.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profilePassword.update');
     Route::put('/profile/phone', [ProfileController::class, 'updatePhone'])->name('profilePhone.update');
     Route::put('/profile/address', [ProfileController::class, 'updateAddress'])->name('profileAddress.update');
+    Route::put('/profile/Image' , [ProfileController::class, 'updateImage'])->name('profileImage.update');
+
+
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
