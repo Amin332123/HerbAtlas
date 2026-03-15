@@ -404,17 +404,20 @@
 
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="john.doe@example.com" required>
+                    <input type="email" id="email" name="email" value="{{ old('email') }}"
+                        placeholder="john.doe@example.com" required>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    <span id="PasswordError" style="color:red;"></span>
                 </div>
 
                 <div class="form-group">
                     <label for="confirmPassword">Confirm Password</label>
                     <input type="password" id="confirmPassword" name="password_confirmation" placeholder="••••••••">
+                    <span id="confirmedPasswordError" style="color:red;"></span>
                 </div>
 
                 <button type="submit" class="submit-btn">Create Account</button>
@@ -437,6 +440,49 @@
     </div>
 
 
+
+    <script>
+        var Passwordregex = /^(?=.*[A-Z])[A-Za-z\d]{8,}$/;
+        var signupForm = document.getElementById('signupForm');
+        signupForm.addEventListener('submit', (e) => {
+            validatePasswordFirst(e);
+        })
+
+
+        function validatePasswordFirst(e) {
+            e.preventDefault();
+
+
+            let password = document.getElementById('password');
+            let confirmedPassword = document.getElementById('confirmPassword');
+            document.getElementById('confirmedPasswordError').innerHTML = " ";
+            document.getElementById('PasswordError').innerHTML = " ";
+            confirmedPassword.style.borderColor = '#374151';
+            password.style.borderColor = '#374151';
+
+
+
+            if (password.value != confirmedPassword.value) {
+                confirmedPassword.style.borderColor = 'red';
+                document.getElementById('confirmedPasswordError').innerHTML = `confirmed password is wrong`;
+                return;
+            }
+            if (!Passwordregex.test(password.value)) {
+                password.style.borderColor = 'red';
+                document.getElementById('PasswordError').innerHTML = `Password should have letters , numbers & one capital letter`;
+                return;
+            }
+
+            e.currentTarget.submit();
+
+
+
+        }
+    </script>
+
+
 </body>
+
+
 
 </html>
