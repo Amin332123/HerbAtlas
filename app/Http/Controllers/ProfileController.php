@@ -6,6 +6,7 @@ use App\Http\Requests\UpdatePasswordRequest;
 use Illuminate\Http\Request;
 use App\Http\Requests\UpdateNameRequest;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\PasswordUpdateRequest;
 class ProfileController extends Controller
 {
     public function index()
@@ -37,6 +38,31 @@ class ProfileController extends Controller
         ]);
 
         return back()->with('success', 'Name updated successfully!');
+    }
+
+
+    public function updatePassword(PasswordUpdateRequest $request)
+    {
+
+        $user = $request->user();
+        if (!Hash::check($request->old_password, $user->password)) {
+            
+            return response()->json([
+                'message' => 'The provided current password does not match our records.',
+                'errors' => [
+                    'old_password' => ['Incorrect current password.']
+                ]
+            ], 422);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password updated successfully!'
+        ]);
     }
 
 

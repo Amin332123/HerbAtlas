@@ -365,16 +365,18 @@
     <x-header />
     <main class="main-content">
         @if ($errors->any())
-            <div
-                style="color: #b91c1c; padding: 1rem; margin-bottom: 1rem; text-align: center;">
+            <div style="color: #b91c1c; padding: 1rem; margin-bottom: 1rem; text-align: center;">
                 <strong>Whoops! Something went wrong:</strong>
                 <ul>
                     @foreach ($errors->all() as $error)
                         {{ $error }}
+                        <p id="responseFromBackend"></p>
                     @endforeach
                 </ul>
             </div>
         @endif
+
+        <p id="responseFromBackend"></p>
         <div class="profile-header">
             <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop"
                 class="profile-image">
@@ -469,14 +471,19 @@
         <div class="modal-overlay" id="passwordModal">
             <div class="modal-card">
                 <h2 class="modal-title">Change Password</h2>
-                <form action="{{ route('profilePassword.update') }}" method="POST" class="modal-form">
+                <form id="passwordForm" action="{{ route('profilePassword.update') }}" method="POST" class="modal-form">
                     @csrf
                     @method('PUT')
-                    <input type="password" name="old_password" placeholder="Current Password" class="modal-input"
-                        required>
-                    <input type="password" name="new_password" placeholder="New Password" class="modal-input" required>
-                    <input type="password" name="new_password_confirmation" placeholder="Confirm New Password"
+                    <div id="PasswordErrors" style="color: red;">
+
+                    </div>
+                    <input id="oldPassword" type="password" name="old_password" placeholder="Current Password"
                         class="modal-input" required>
+                    <input id="newPassword" type="password" name="new_password" placeholder="New Password"
+                        class="modal-input" required>
+                    <input id="newPasswordConfirmation" type="password" name="new_password_confirmation"
+                        placeholder="Confirm New Password" class="modal-input" required>
+
                     <div class="modal-actions">
                         <button type="button" class="cancel-btn" onclick="closeModal('passwordModal')">Cancel</button>
                         <button type="submit" class="edit-btn" onclick="showModal('passwordModal')">Edit</button>
@@ -546,6 +553,12 @@
     <script>
         let iti;
         function showModal(modalId) {
+            let PasswordErrors = document.getElementById('PasswordErrors');
+            if (PasswordErrors) {
+                PasswordErrors.innerHTML = " ";
+            }
+
+
             document.getElementById(modalId).style.display = 'flex';
         }
         function showPhoneModal() {
@@ -569,6 +582,89 @@
                 document.getElementById('hiddenPhoneValue').value = fullNumber;
             }
         };
+
+
+        // password :
+
+        var regex = /^(?=.*[A-Z])[A-Za-z\d]{8,}$/;
+
+
+        let passwordForm = document.getElementById('passwordForm');
+
+
+        passwordForm.addEventListener('submit', (e) => {
+            updatePassword(e);
+        })
+
+
+        function updatePassword(e) {
+            e.preventDefault();
+
+            let PasswordErrors = document.getElementById('PasswordErrors');
+            PasswordErrors.innerHTML = " ";
+            let old_password = document.getElementById('oldPassword').value;
+            let new_password = document.getElementById('newPassword').value;
+            let new_password_confirmation = document.getElementById('newPasswordConfirmation').value;
+
+            if (!regex.test(old_password) || !regex.test(new_password)) {
+                PasswordErrors.innerHTML += `ivalid password or new Password`;
+                return;
+
+            }
+            else if (new_password != new_password_confirmation) {
+                PasswordErrors.innerHTML += `new password confirmation is wrong`;
+                return;
+            }
+
+
+            fetch('/profile/password', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+
+                body: JSON.stringify({ _method: 'PUT', old_password, new_password, new_password_confirmation })
+            })
+                .then(async res => {
+
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        return data;
+                    } else {
+                        throw data;
+                    }
+                })
+                .then(data => {
+                    document.getElementById('passwordForm').reset();
+                    document.getElementById('responseFromBackend').innerHTML = data.message;
+                    setTimeout(() => {
+                        document.getElementById('responseFromBackend').innerHTML = " ";
+
+                    });
+                    document.getElementById('responseFromBackend').innerHTML = " ";
+
+
+
+                })
+                .catch(error => {
+                    const errorDiv = document.getElementById('PasswordErrors');
+
+                    if (error.message) {
+
+                        errorDiv.innerHTML = error.message;
+                    } else {
+                        errorDiv.innerHTML = "An unexpected error occurred.";
+                    }
+                });
+
+
+
+        }
+
+
     </script>
 </body>
 
