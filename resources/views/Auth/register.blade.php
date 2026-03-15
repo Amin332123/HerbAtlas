@@ -430,7 +430,7 @@
                 @endif
 
                 <div class="login-section">
-                    <p>Already have an account? <a href="login-page.html" class="login-link">Log in</a></p>
+                    <p>Already have an account? <a href="{{ route('login') }}" class="login-link">Log in</a></p>
                 </div>
             </form>
         </div>
