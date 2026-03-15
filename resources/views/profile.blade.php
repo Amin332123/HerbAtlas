@@ -375,6 +375,9 @@
                 </ul>
             </div>
         @endif
+        @error('phone')
+            <small style="color: var(--coral); margin-top: 5px;">{{ $message }}</small>
+        @enderror
 
         <p id="responseFromBackend"></p>
         <div class="profile-header">
@@ -399,9 +402,12 @@
                 <div class="info-item">
                     <div>
                         <div class="info-label">Phone Number</div>
-                        <div class="info-value">+1 (555) 123-4567</div>
+                        <div class="info-value" id="phoneDisplay">
+                            {{ $user->phone_number ? $user->phone_number : 'No Number Phone Added' }}
+                        </div>
                     </div>
-                    <button class="edit-btn" onclick="showPhoneModal()">Edit</button>
+                    <button class="edit-btn"
+                        onclick="showPhoneModal()">{{ $user->phone_number ? 'Edit' : 'Add'}}</button>
                 </div>
 
                 <div class="info-item">
@@ -452,21 +458,24 @@
             </div>
         </div>
 
+
         <div class="modal-overlay" id="phoneModal">
             <div class="modal-card">
                 <h2 class="modal-title">Edit Phone Number</h2>
                 <form action="{{ route('profilePhone.update') }}" method="POST" class="modal-form" id="phoneForm">
                     @csrf
                     @method('PUT')
-                    <input type="hidden" name="phone" id="hiddenPhoneValue">
+                    <input type="hidden" name="phone_number" id="hiddenPhoneValue">
                     <input type="tel" id="phoneInput" class="modal-input" style="width: 100%;" required>
+                    <span id="phoneError"></span>
                     <div class="modal-actions">
                         <button type="button" class="cancel-btn" onclick="closeModal('phoneModal')">Cancel</button>
-                        <button class="edit-btn" onclick="showPhoneModal()">Edit</button>
+                        <button type="submit" class="edit-btn">{{ $user->phone_number ? 'Edit' : 'Add'}}</button>
                     </div>
                 </form>
             </div>
         </div>
+
 
         <div class="modal-overlay" id="passwordModal">
             <div class="modal-card">
@@ -565,6 +574,7 @@
             const modal = document.getElementById('phoneModal');
             modal.style.display = 'flex';
             const input = document.querySelector("#phoneInput");
+
             if (!iti) {
                 iti = window.intlTelInput(input, {
                     initialCountry: "ma",
@@ -572,16 +582,74 @@
                     utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@21.1.1/build/js/utils.js",
                 });
             }
+            const currentNumber = "{{ $user->phone_number ?? '' }}";
+
+            if (currentNumber) {
+
+                iti.setNumber(currentNumber);
+            } else {
+
+                iti.setNumber("");
+            }
+
+
+            const phoneForm = document.getElementById('phoneForm');
+            phoneForm.addEventListener('submit', function (e) {
+
+                e.preventDefault();
+                const errorMsg = document.getElementById('phoneError');
+                errorMsg.innerHTML = " ";
+                const inputField = document.getElementById('phoneInput');
+
+                if (iti.isValidNumber()) {
+                    const fullNumber = iti.getNumber();
+                    document.getElementById('hiddenPhoneValue').value = fullNumber;
+                    
+                    // AJAX Submit to avoid 302 Redirect
+                    fetch("{{ route('profilePhone.update') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            _method: 'PUT',
+                            phone_number: fullNumber
+                        })
+                    })
+                    .then(async response => {
+                        const data = await response.json();
+                        if (!response.ok) throw data;
+                        return data;
+                    })
+                    .then(data => {
+                        document.getElementById('phoneDisplay').textContent = fullNumber;
+                        document.getElementById('responseFromBackend').innerText = data.message;
+                        closeModal('phoneModal');
+                        // Clear success message after 3 seconds
+                        setTimeout(() => document.getElementById('responseFromBackend').innerText = "", 3000);
+                    })
+                    .catch(error => {
+                        errorMsg.innerHTML = error.errors?.phone_number ? error.errors.phone_number[0] : (error.message || "An error occurred");
+                    });
+                } else {
+                    errorMsg.innerHTML = "Please enter a valid phone number.";
+                    return;
+                }
+
+            });
+
+
+
         }
+
+
+
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
-        document.getElementById('phoneForm').onsubmit = function (e) {
-            if (iti) {
-                const fullNumber = iti.getNumber();
-                document.getElementById('hiddenPhoneValue').value = fullNumber;
-            }
-        };
+
 
 
         // password :

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Http\Requests\UpdatePhoneRequest;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\UpdatePasswordRequest;
 use Illuminate\Http\Request;
@@ -46,7 +47,7 @@ class ProfileController extends Controller
 
         $user = $request->user();
         if (!Hash::check($request->old_password, $user->password)) {
-            
+
             return response()->json([
                 'message' => 'The provided current password does not match our records.',
                 'errors' => [
@@ -56,7 +57,7 @@ class ProfileController extends Controller
         }
 
         $user->update([
-            'password' => Hash::make($request->password)
+            'password' => $request->new_password
         ]);
 
         return response()->json([
@@ -65,6 +66,15 @@ class ProfileController extends Controller
         ]);
     }
 
+    public function updatePhone(UpdatePhoneRequest $request)
+    {
+        $request->user()->update([
+            'phone_number' => $request->phone_number,
+        ]);
+
+        return response()->json(['message' => 'Phone number updated successfully!']);
+
+    }
 
 
 
