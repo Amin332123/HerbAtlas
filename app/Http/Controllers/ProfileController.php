@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests\UpdateNameRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\PasswordUpdateRequest;
+use App\Http\Requests\UpdatePhotoRequest;
+use Illuminate\Support\Facades\Storage;
 class ProfileController extends Controller
 {
     public function index()
@@ -74,6 +76,37 @@ class ProfileController extends Controller
 
         return response()->json(['message' => 'Phone number updated successfully!']);
 
+    }
+
+
+
+
+    public function updateImage(UpdatePhotoRequest $request)
+    {
+        $user = $request->user();
+
+        if ($request->hasFile('photo')) {
+            
+            $newPath = $request->file('photo')->store('profiles', 'public');
+
+            
+            if ($user->picture) {
+                
+                Storage::disk('public')->delete($user->picture->img_path);
+
+              
+                $user->picture()->update([
+                    'img_path' => $newPath
+                ]);
+            } else {
+              
+                $user->picture()->create([
+                    'img_path' => $newPath
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Profile picture updated successfully!');
     }
 
 
