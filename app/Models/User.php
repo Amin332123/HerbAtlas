@@ -19,33 +19,47 @@ class User extends Authenticatable implements MustVerifyEmail
      */
 
     protected $fillable = [
-        'firstName' , 'lastName' , 'email', 'password', 'email_verified_at', 'phone_number'
+        'firstName',
+        'lastName',
+        'email',
+        'password',
+        'email_verified_at',
+        'phone_number',
+        'street',
+        'city',
+        'postal_code',
+        'region'
     ];
 
-    public function role() {
+    public function role()
+    {
         return $this->hasOne(Role::class);
     }
 
 
-    public function reports() {
+    public function reports()
+    {
         return $this->hasMany(Report::class);
 
     }
 
 
-    public function picture() {
+    public function picture()
+    {
         return $this->hasOne(Picture::class);
     }
 
-    public function orders() {
+    public function orders()
+    {
         return $this->hasMany(Order::class);
     }
 
-    public function feedbacks() {
+    public function feedbacks()
+    {
         return $this->hasMany(Feedback::class);
     }
 
-    
+
     /**
      * The attributes that should be hidden for serialization.
      *

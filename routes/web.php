@@ -44,9 +44,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile/phone', [ProfileController::class, 'updatePhone'])->name('profilePhone.update');
     Route::put('/profile/address', [ProfileController::class, 'updateAddress'])->name('profileAddress.update');
     Route::put('/profile/Image' , [ProfileController::class, 'updateImage'])->name('profileImage.update');
-
+    Route::put('/profile/address', [ProfileController::class , 'updateAddress'])->name('profileAddress.update');
 
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
+    
 
 });

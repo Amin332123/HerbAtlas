@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\PasswordUpdateRequest;
 use App\Http\Requests\UpdatePhotoRequest;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\UpdateAddressRequest;
 class ProfileController extends Controller
 {
     public function index()
@@ -86,20 +87,20 @@ class ProfileController extends Controller
         $user = $request->user();
 
         if ($request->hasFile('photo')) {
-            
+
             $newPath = $request->file('photo')->store('profiles', 'public');
 
-            
+
             if ($user->picture) {
-                
+
                 Storage::disk('public')->delete($user->picture->img_path);
 
-              
+
                 $user->picture()->update([
                     'img_path' => $newPath
                 ]);
             } else {
-              
+
                 $user->picture()->create([
                     'img_path' => $newPath
                 ]);
@@ -107,6 +108,26 @@ class ProfileController extends Controller
         }
 
         return back()->with('success', 'Profile picture updated successfully!');
+    }
+
+
+
+
+    public function updateAddress(UpdateAddressRequest $request)
+    {
+        $user = $request->user();
+
+        
+        $user->update(
+            [
+                'street' => $request->street,
+                'city' => $request->city,
+                'postal_code' => $request->postal_code,
+                'region' => $request->region,
+            ]
+        );
+
+        return back()->with('success', 'Address updated successfully!');
     }
 
 
