@@ -281,11 +281,23 @@
         /* The Modal Box */
         .modal-card {
             background: white;
-            padding: 30px;
+            padding: 40px;
+            /* Increase from 30px to 40px for more internal "breath" */
             border-radius: 20px;
+
+            /* Controlling the Size */
             width: 90%;
-            max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            /* Ensures it doesn't touch screen edges on mobile */
+            max-width: 600px;
+            /* Increase this (e.g., 600px or 700px) to make it wider */
+
+            /* Optional: Controlling Height */
+            min-height: 400px;
+            /* Force a minimum height if you want it to look "tall" */
+
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         .modal-title {
@@ -294,6 +306,8 @@
             color: var(--teal);
             margin-bottom: 20px;
         }
+
+
 
         .modal-form {
             display: flex;
@@ -391,6 +405,112 @@
             cursor: pointer;
             font-weight: 600;
             animation: fadeIn 0.5s ease;
+        }
+
+        /* Update your form-grid to use the new space */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            /* Equal 50/50 split now that it's wider */
+            gap: 20px;
+            /* Bigger gap for a bigger modal */
+        }
+
+        .form-group {
+            display: grid;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #4a5568;
+            /* Soft dark gray */
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .modal-input {
+            padding: 12px 16px;
+            border: 2px solid #edf2f7;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--teal);
+            /* Your main project color */
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(0, 128, 128, 0.1);
+        }
+
+        /* Modal Styling */
+        .modal-card {
+            background: white;
+            padding: 40px;
+            /* Increase from 30px to 40px for more internal "breath" */
+            border-radius: 20px;
+
+            /* Controlling the Size */
+            width: 90%;
+            /* Ensures it doesn't touch screen edges on mobile */
+            max-width: 600px;
+            /* Increase this (e.g., 600px or 700px) to make it wider */
+
+            /* Optional: Controlling Height */
+            min-height: 400px;
+            /* Force a minimum height if you want it to look "tall" */
+
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            margin-bottom: 25px;
+        }
+
+        .modal-subtitle {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: var(--teal);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(110%);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
         }
 
         @keyframes fadeIn {
@@ -519,9 +639,9 @@
                 <div class="info-item">
                     <div>
                         <div class="info-label">Address</div>
-                        <div class="info-value">123 Wellness Avenue, Nature City, NC 12345</div>
+                        <div class="info-value">{{ $user->Region }} - {{ $user->city }} {{ $user->street }}  {{ $user->postal_code }}</div>
                     </div>
-                    <button class="edit-btn" onclick="showModal('addressModal')">Edit</button>
+                    <button class="edit-btn" onclick="showModal('addressModal')">{{ $user->city ? "Edit" : "Add" }}</button>
                 </div>
 
             </div>
@@ -601,14 +721,46 @@
 
         <div class="modal-overlay" id="addressModal">
             <div class="modal-card">
-                <h2 class="modal-title">Edit Address</h2>
+                <div class="modal-header">
+                    <h2 class="modal-title">{{ $user->city ? "Edit" : "Add" }} Shipping Address</h2>
+                    <p class="modal-subtitle">Ensure your delivery details are accurate.</p>
+                </div>
+
                 <form action="{{ route('profileAddress.update') }}" method="POST" class="modal-form">
                     @csrf
                     @method('PUT')
-                    <input type="text" name="address" placeholder="Shipping Address" class="modal-input" required>
-                    <div class="modal-actions">
-                        <button type="button" class="cancel-btn" onclick="closeModal('addressModal')">Cancel</button>
-                        <button type="submit" class="save-btn">Save Changes</button>
+
+                    <div class="form-group">
+                        <label for="street"><i class="fas fa-map-marker-alt"></i> Street Address</label>
+                        <input type="text" name="street" id="street" value="{{ $user->address->street ?? '' }}"
+                            placeholder="e.g. 15 Rue Hassan II, Appt 4" class="modal-input" required>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" name="city" id="city" value="{{ $user->address->city ?? '' }}"
+                                placeholder="Casablanca" class="modal-input" required>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label for="postal_code">Postal Code</label>
+                                <input type="text" name="postal_code" id="postal_code"
+                                    value="{{ $user->address->postal_code ?? '' }}" placeholder="20000"
+                                    class="modal-input" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="region">State / Region</label>
+                        <input type="text" name="region" id="region" value="{{ $user->address->region ?? '' }}"
+                            placeholder="Grand Casablanca" class="modal-input">
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" onclick="closeModal('addressModal')">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Address</button>
                     </div>
                 </form>
             </div>
@@ -836,11 +988,11 @@
 
         function previewImage(event) {
             document.getElementById('imgerror').innerHTML = " ";
-           
+
             const reader = new FileReader();
             const preview = document.getElementById('avatar-preview');
             const saveBtn = document.getElementById('save-photo-btn');
-             saveBtn.style.display = 'none';
+            saveBtn.style.display = 'none';
 
             reader.onload = function () {
                 if (reader.readyState === 2) {
@@ -856,6 +1008,49 @@
                 }
                 reader.readAsDataURL(event.target.files[0]);
             }
+        }
+
+
+
+        document.querySelector('#addressModal form').addEventListener('submit', function (e) {
+            let isValid = true;
+            const street = document.getElementById('street').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const postalCode = document.getElementById('postal_code').value.trim();
+
+            // Clear previous errors
+            document.querySelectorAll('.js-error').forEach(el => el.remove());
+
+            // Validation Logic
+            if (street.length < 5) {
+                showJsError('street', 'Street address seems too short.');
+                isValid = false;
+            }
+
+            if (city.length < 2) {
+                showJsError('city', 'Please enter a valid city name.');
+                isValid = false;
+            }
+
+            // Moroccan Postal Code check (usually 5 digits)
+            if (!/^\d{5}$/.test(postalCode)) {
+                showJsError('postal_code', 'Postal code must be exactly 5 digits.');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault(); 
+            }
+        });
+
+        function showJsError(id, message) {
+            const input = document.getElementById(id);
+            const error = document.createElement('small');
+            error.className = 'js-error';
+            error.style.color = 'var(--coral)';
+            error.style.marginTop = '5px';
+            error.innerText = message;
+            input.after(error);
         }
 
 
