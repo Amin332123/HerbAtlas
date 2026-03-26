@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Storage;
 use App\Models\Picture;
 use Illuminate\Http\Request;
 use App\Models\Product;
@@ -20,11 +20,11 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
 
-       
+
 
         $category = Category::where('title', $request->category)->first();
 
-        
+
         $product = Product::create([
             'name' => $request->name,
             'description' => $request->description,
@@ -32,8 +32,8 @@ class ProductController extends Controller
             'stock' => $request->stock,
             'category_id' => $category->id,
         ]);
-       $product->refresh();
-     
+        $product->refresh();
+
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $path = $image->store('products', 'public');
@@ -53,10 +53,28 @@ class ProductController extends Controller
     }
 
 
-    public function show($id) {
-        $product = Product::where('id' , $id)->first();
+    public function show($id)
+    {
+        $product = Product::where('id', $id)->first();
 
         return view('productDetails', compact('product'));
+    }
+
+
+
+    public function destroy(Product $product)
+    {
+
+        foreach ($product->pictures as $picture) {
+          
+            if (Storage::disk('public')->exists($picture->img_path)) {
+                Storage::disk('public')->delete($picture->img_path);
+            }
+            $picture->delete();
+        }
+        $product->delete();
+
+        return redirect()->route('product.index')->with('success', 'Product and all associated images removed successfully.');
     }
 
 

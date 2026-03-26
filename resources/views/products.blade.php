@@ -833,12 +833,12 @@
             @forelse ($products as $product)
                 <div class="product-card" data-category="{{ $product->category ?? 'medicinal' }}"
                     data-price="{{ $product->price }}">
-                 
-                   @foreach ($product->pictures  as $picture)
-                    <img src="{{ asset('storage/' . $picture->img_path) }}"
-                        class="product-image" alt="{{ $product->name }}">
+
+                    @foreach ($product->pictures as $picture)
+                        <img src="{{ asset('storage/' . $picture->img_path) }}" class="product-image"
+                            alt="{{ $product->name }}">
                         @break
-                   @endforeach
+                    @endforeach
 
                     <h3>{{ $product->name }}</h3>
                     <p>{{ Str::limit($product->description, 60) }}</p>
@@ -864,9 +864,9 @@
                         </a>
 
                         <!-- Delete form -->
-                        <form action="{{ url('/products/' . $product->id) }}" method="POST"
-                            onsubmit="return confirm('Delete this herb?')" style="display: inline;">
-                            @csrf @method('DELETE')
+                        <form action="{{ route('products.destroy', $product->id) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
                             <button type="submit" class="delete-btn">
                                 <i class="fas fa-trash"></i>
                             </button>

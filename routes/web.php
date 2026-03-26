@@ -57,7 +57,7 @@ Route::middleware('auth')->group(function () {
 
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::post('/ai/generate-description', [AiController::class, 'generateDescription'])->name('ai.generate-description');
 
 
