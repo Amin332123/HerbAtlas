@@ -9,7 +9,8 @@ class Picture extends Model
 
     protected $fillable = [
         'user_id',
-        'img_path',
+        'product_id',
+        'img_path'
     ];
 
 
