@@ -16,6 +16,35 @@ class ProductController extends Controller
         return view('products', compact('products', 'categories'));
     }
 
+    public function edit($id)
+    {
+        $product = Product::with('pictures')->findOrFail($id);
+        $categories = Category::all();
+        return view('productEdit', compact('product', 'categories'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+        $category = Category::where('title', $request->category)->first();
+
+        $product->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'stock' => $request->stock,
+            'category_id' => $category->id,
+        ]);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('products', 'public');
+                Picture::create(['product_id' => $product->id, 'img_path' => $path]);
+            }
+        }
+
+        return redirect()->route('product.index')->with('success', 'Product updated successfully!');
+    }
 
     public function store(StoreProductRequest $request)
     {
@@ -55,7 +84,7 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        $product = Product::where('id', $id)->first();
+        $product = Product::with(['category', 'pictures'])->findOrFail($id);
 
         return view('productDetails', compact('product'));
     }

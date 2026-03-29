@@ -1013,6 +1013,45 @@
             }
         }
 
+        async function generateDescription() {
+            const promptInput = document.getElementById('aiPromptInput');
+            const nameInput = document.getElementById('productName');
+            const descriptionArea = document.getElementById('productDescription');
+            const genBtn = document.getElementById('aiGenerateBtn');
+
+            if (!promptInput.value.trim()) {
+                showToast('Please enter a prompt first', 'error');
+                return;
+            }
+
+            genBtn.disabled = true;
+            const originalBtnContent = genBtn.innerHTML;
+            genBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+
+            try {
+                const response = await fetch("{{ route('ai.generate-description') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: promptInput.value,
+                        name: nameInput.value
+                    })
+                });
+                const data = await response.json();
+                descriptionArea.value = data.description;
+                showToast('AI description generated!');
+            } catch (e) {
+                showToast('AI service temporarily unavailable', 'error');
+            } finally {
+                genBtn.disabled = false;
+                genBtn.innerHTML = originalBtnContent;
+            }
+        }
+
 
         // ----- Create Modal JS (only for modal display & image upload) -----
         let imageRowCounter = 1; // start from 1 because we have row 0

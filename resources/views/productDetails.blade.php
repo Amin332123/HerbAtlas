@@ -767,7 +767,6 @@
 </head>
 
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="logo-container">
             <div class="logo-icon">HA</div>
@@ -782,9 +781,9 @@
         </nav>
 
         <div class="header-actions">
-            <button class="cart-btn">
+            <button class="cart-btn" onclick="window.location.href='{{ url('/orders/draft') }}'">
                 <i class="fas fa-shopping-cart"></i>
-                <span class="cart-badge">0</span>
+                <span class="cart-badge" id="cartBadge">0</span>
             </button>
             <a href="{{ url('/logout') }}" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Logout
@@ -792,7 +791,6 @@
         </div>
     </header>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer">
         @if(session('success'))
             <div class="toast">
@@ -804,14 +802,12 @@
 
    
 
-    <!-- Main Content -->
     <main class="main-content">
         <a href="{{ url('/products') }}" class="back-btn">
             <i class="fas fa-arrow-left"></i> Back to Products
         </a>
 
         <div class="product-details-container">
-            <!-- Product Gallery -->
             <div class="product-gallery">
                 <div class="main-image-container">
                     @if($product->category)
@@ -836,7 +832,6 @@
                 @endif
             </div>
 
-            <!-- Product Info -->
             <div class="product-info">
                 @if($product->category)
                     <span class="product-category">
@@ -929,7 +924,6 @@
             </div>
         </div>
 
-        <!-- Features Section -->
         <section class="features-section">
             <div class="features-grid">
                 <div class="feature-card">
@@ -965,34 +959,81 @@
     </main>
 
     <script>
-        // Image gallery
+        // --- LocalStorage Integration ---
+        
+        // Load initial badge count
+        document.addEventListener('DOMContentLoaded', () => {
+            updateBadge();
+        });
+
+        function getDraftOrder() {
+            const order = localStorage.getItem('herb_order');
+            return order ? JSON.parse(order) : [];
+        }
+
+        function updateBadge() {
+            const order = getDraftOrder();
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                // Total unique products or total quantity? Let's go with unique products count
+                badge.textContent = order.length;
+            }
+        }
+
+        // Add to cart logic
+        function addToCart() {
+            const quantity = parseInt(document.getElementById('quantityInput').value);
+            
+            const product = {
+                id: "{{ $product->id }}",
+                name: "{{ addslashes($product->name) }}",
+                price: "{{ $product->price }}",
+                image: "{{ asset('storage/' . $product->pictures->first()->img_path) }}",
+                quantity: quantity
+            };
+
+            let currentOrder = getDraftOrder();
+            const existingIndex = currentOrder.findIndex(item => item.id === product.id);
+
+            if (existingIndex > -1) {
+                currentOrder[existingIndex].quantity += quantity;
+            } else {
+                currentOrder.push(product);
+            }
+
+            localStorage.setItem('herb_order', JSON.stringify(currentOrder));
+            updateBadge();
+            showToast(`Added ${quantity} item(s) to cart!`);
+        }
+
+        
+        function buyNow() {
+            addToCart();
+            window.location.href = '{{ url("/orders/draft") }}';
+        }
+
+        -
+
         function changeMainImage(thumbnail) {
             const mainImage = document.getElementById('mainImage');
             mainImage.src = thumbnail.src.replace('w=150', 'w=600');
-            
             document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
             thumbnail.classList.add('active');
         }
 
-        // Quantity controls
         function decreaseQuantity() {
             const input = document.getElementById('quantityInput');
             const currentValue = parseInt(input.value);
-            if (currentValue > 1) {
-                input.value = currentValue - 1;
-            }
+            if (currentValue > 1) input.value = currentValue - 1;
         }
 
         function increaseQuantity() {
             const input = document.getElementById('quantityInput');
             const currentValue = parseInt(input.value);
             const maxValue = parseInt(input.max);
-            if (currentValue < maxValue) {
-                input.value = currentValue + 1;
-            }
+            if (currentValue < maxValue) input.value = currentValue + 1;
         }
 
-        // Wishlist toggle
         function toggleWishlist(btn) {
             btn.classList.toggle('active');
             const icon = btn.querySelector('i');
@@ -1007,26 +1048,6 @@
             }
         }
 
-        // Add to cart
-        function addToCart() {
-            const quantity = document.getElementById('quantityInput').value;
-            // Add your cart logic here
-            showToast(`Added ${quantity} item(s) to cart!`);
-            
-            // Update cart badge
-            const badge = document.querySelector('.cart-badge');
-            const currentCount = parseInt(badge.textContent);
-            badge.textContent = currentCount + parseInt(quantity);
-        }
-
-        // Buy now
-        function buyNow() {
-            const quantity = document.getElementById('quantityInput').value;
-            // Redirect to checkout
-            window.location.href = '{{ url("/checkout") }}?product={{ $product->id }}&quantity=' + quantity;
-        }
-
-        // Toast notification
         function showToast(message) {
             const toastContainer = document.getElementById('toastContainer');
             const toast = document.createElement('div');

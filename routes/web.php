@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\AiController;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -54,11 +56,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/products', [ProductController::class, 'index'])->name('product.index');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('/products/{id}', [ProductController::class, 'show'])->name('product.show');                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-
+    Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::post('/ai/generate-description', [AiController::class, 'generateDescription'])->name('ai.generate-description');
 
 
+
+    Route::get('/orders', [OrderController::class , 'index'])->name('orders.index');
+    Route::get('/orders/{id}' , [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/checkout', [OrderController::class, 'store'])->name('orders.checkout');
 });
