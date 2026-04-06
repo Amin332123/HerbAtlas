@@ -7,7 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\AiController;
+use App\Http\Controllers\Api\AiController;
 Route::get('/', function () {
     return view('welcome');
 });

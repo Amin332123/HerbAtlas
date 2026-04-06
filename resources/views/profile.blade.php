@@ -33,76 +33,7 @@
             color: var(--dark);
         }
 
-        .header {
-            background: white;
-            padding: 20px 60px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(102, 191, 191, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
 
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, var(--teal), var(--coral));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Playfair Display', serif;
-            font-weight: 900;
-            font-size: 1.2rem;
-            color: white;
-        }
-
-        .logo-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--teal);
-        }
-
-        .nav-menu {
-            display: flex;
-            align-items: center;
-            gap: 35px;
-        }
-
-        .nav-link {
-            color: var(--gray);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .nav-link:hover {
-            color: var(--teal);
-        }
-
-        .nav-link.active {
-            color: var(--teal);
-            font-weight: 600;
-        }
-
-        .logout-btn {
-            padding: 10px 24px;
-            background: linear-gradient(135deg, var(--coral), #ff7b9a);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-        }
 
         .main-content {
             max-width: 1000px;

@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Orders - Herb Atlas</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800;900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -21,25 +24,29 @@
             --warning: #b45309;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Outfit', sans-serif;
             background:
-                radial-gradient(circle at top left, rgba(102,191,191,0.08), transparent 24%),
-                radial-gradient(circle at bottom right, rgba(247,107,138,0.08), transparent 22%),
+                radial-gradient(circle at top left, rgba(102, 191, 191, 0.08), transparent 24%),
+                radial-gradient(circle at bottom right, rgba(247, 107, 138, 0.08), transparent 22%),
                 var(--light-teal);
             color: var(--dark);
             min-height: 100vh;
         }
 
         .header {
-            background: rgba(255,255,255,0.94);
+            background: rgba(255, 255, 255, 0.94);
             padding: 18px 60px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 18px rgba(102,191,191,0.12);
+            box-shadow: 0 2px 18px rgba(102, 191, 191, 0.12);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -128,9 +135,9 @@
         .pending-card,
         .history-card,
         .empty-card {
-            background: rgba(255,255,255,0.96);
-            border: 1px solid rgba(255,255,255,0.8);
-            box-shadow: 0 10px 35px rgba(102,191,191,0.12);
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 35px rgba(102, 191, 191, 0.12);
         }
 
         .pending-card {
@@ -159,7 +166,7 @@
             width: 220px;
             height: 220px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(102,191,191,0.08), transparent 70%);
+            background: radial-gradient(circle, rgba(102, 191, 191, 0.08), transparent 70%);
         }
 
         .card-top {
@@ -205,7 +212,7 @@
             font-size: 0.78rem;
             font-weight: 700;
             text-transform: uppercase;
-            border: 1px solid rgba(180,83,9,0.12);
+            border: 1px solid rgba(180, 83, 9, 0.12);
         }
 
         .status-dot {
@@ -217,8 +224,17 @@
         }
 
         @keyframes pulse {
-            0%,100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.72); }
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(0.72);
+            }
         }
 
         .product-strip {
@@ -233,7 +249,7 @@
             border-radius: 50%;
             border: 3px solid white;
             overflow: hidden;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
             margin-right: -12px;
             flex-shrink: 0;
             position: relative;
@@ -260,7 +276,7 @@
             font-weight: 700;
             margin-right: -12px;
             flex-shrink: 0;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
         }
 
         .strip-meta {
@@ -342,20 +358,20 @@
             align-items: center;
             gap: 8px;
             transition: all 0.25s;
-            box-shadow: 0 5px 18px rgba(102,191,191,0.3);
+            box-shadow: 0 5px 18px rgba(102, 191, 191, 0.3);
             text-decoration: none;
         }
 
         .btn-view:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(102,191,191,0.4);
+            box-shadow: 0 8px 24px rgba(102, 191, 191, 0.4);
         }
 
         .empty-card {
             border-radius: 24px;
             padding: 60px 40px;
             text-align: center;
-            border: 1.5px dashed rgba(102,191,191,0.32);
+            border: 1.5px dashed rgba(102, 191, 191, 0.32);
             margin-bottom: 48px;
         }
 
@@ -413,7 +429,7 @@
 
         .history-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 28px rgba(102,191,191,0.16);
+            box-shadow: 0 12px 28px rgba(102, 191, 191, 0.16);
         }
 
         .history-icon {
@@ -480,147 +496,155 @@
         }
 
         @media (max-width: 768px) {
-            .header { padding: 16px 20px; }
-            .page { padding: 30px 16px 60px; }
+            .header {
+                padding: 16px 20px;
+            }
+
+            .page {
+                padding: 30px 16px 60px;
+            }
+
             .card-top,
             .history-card,
             .card-stats {
                 flex-direction: column;
                 align-items: flex-start;
             }
+
             .card-actions,
             .history-right {
                 margin-left: 0;
                 align-items: flex-start;
             }
-            .stat-divider { display: none; }
+
+            .stat-divider {
+                display: none;
+            }
+
             .strip-meta {
                 margin-left: 20px;
             }
         }
     </style>
 </head>
+
 <body>
-<header class="header">
-    <a href="/" class="logo-container">
-        <div class="logo-icon">HA</div>
-        <span class="logo-text">Herb Atlas</span>
-    </a>
-</header>
-
-<main class="page">
-    <div class="page-header">
-        <h1><i class="fas fa-receipt"></i> My Orders</h1>
-        <p>Your order area now supports two sources of truth: your browser draft order stored in local storage, and your confirmed orders loaded from the database.</p>
-    </div>
-
-    <div class="section-label"><i class="fas fa-clock" style="color:var(--teal)"></i> Draft Order</div>
-    <div id="pendingSection"></div>
-
-    <div class="section-label"><i class="fas fa-check-circle" style="color:var(--teal)"></i> Saved Orders</div>
-    @if($orders->isEmpty())
-        <div class="empty-card">
-            <div class="empty-icon"><i class="fas fa-box-open"></i></div>
-            <h3>No saved orders yet</h3>
-            <p>Your database-backed orders will appear here after checkout is completed.</p>
-            <a href="{{ route('product.index') }}"><i class="fas fa-arrow-right"></i> Browse Products</a>
+    <x-header />
+    <main class="page">
+        <div class="page-header">
+            <h1><i class="fas fa-receipt"></i> My Orders</h1>
+            <p>Your order area now supports two sources of truth: your browser draft order stored in local storage, and
+                your confirmed orders loaded from the database.</p>
         </div>
-    @else
-        <div class="history-list">
-            @foreach($orders as $order)
-                @php
-                    $firstProduct = $order->products->first();
-                    $previewNames = $order->products->take(2)->pluck('name')->implode(', ');
-                    $remainingCount = max($order->products->count() - 2, 0);
-                    $metaTail = $remainingCount > 0 ? ' +' . $remainingCount . ' more' : '';
-                    $displayName = $order->name ?: ('Order #' . $order->id);
-                @endphp
-                <div class="history-card">
-                    <div class="history-icon"><i class="fas fa-box"></i></div>
-                    <div class="history-body">
-                        <div class="history-id">#{{ $displayName }}</div>
-                        <div class="history-meta">
-                            Saved {{ optional($order->created_at)->format('d M Y') ?? 'recently' }}
-                            &nbsp;·&nbsp;
-                            {{ $previewNames ?: 'Natural Herb Atlas products' }}{{ $metaTail }}
+
+        <div class="section-label"><i class="fas fa-clock" style="color:var(--teal)"></i> Draft Order</div>
+        <div id="pendingSection"></div>
+
+        <div class="section-label"><i class="fas fa-check-circle" style="color:var(--teal)"></i> Saved Orders</div>
+        @if($orders->isEmpty())
+            <div class="empty-card">
+                <div class="empty-icon"><i class="fas fa-box-open"></i></div>
+                <h3>No saved orders yet</h3>
+                <p>Your database-backed orders will appear here after checkout is completed.</p>
+                <a href="{{ route('product.index') }}"><i class="fas fa-arrow-right"></i> Browse Products</a>
+            </div>
+        @else
+            <div class="history-list">
+                @foreach($orders as $order)
+                    @php
+                        $firstProduct = $order->products->first();
+                        $previewNames = $order->products->take(2)->pluck('name')->implode(', ');
+                        $remainingCount = max($order->products->count() - 2, 0);
+                        $metaTail = $remainingCount > 0 ? ' +' . $remainingCount . ' more' : '';
+                        $displayName = $order->name ?: ('Order #' . $order->id);
+                    @endphp
+                    <div class="history-card">
+                        <div class="history-icon"><i class="fas fa-box"></i></div>
+                        <div class="history-body">
+                            <div class="history-id">#{{ $displayName }}</div>
+                            <div class="history-meta">
+                                Saved {{ optional($order->created_at)->format('d M Y') ?? 'recently' }}
+                                &nbsp;·&nbsp;
+                                {{ $previewNames ?: 'Natural Herb Atlas products' }}{{ $metaTail }}
+                            </div>
+                        </div>
+                        <div class="history-right">
+                            <span class="delivered-badge"><i class="fas fa-database"></i> In Database</span>
+                            <span class="history-total">{{ number_format($order->calculated_total ?? 0, 2) }} MAD</span>
+                            <a href="{{ route('orders.show', 'draft') !== '' ? route('orders.show', $order->id) : '/orders/' . $order->id }}"
+                                class="btn-view">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
                         </div>
                     </div>
-                    <div class="history-right">
-                        <span class="delivered-badge"><i class="fas fa-database"></i> In Database</span>
-                        <span class="history-total">{{ number_format($order->calculated_total ?? 0, 2) }} MAD</span>
-                        <a href="{{ route('orders.show', 'draft') !== '' ? route('orders.show', $order->id) : '/orders/' . $order->id }}" class="btn-view">
-                            <i class="fas fa-eye"></i> View Details
-                        </a>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    @endif
-</main>
+                @endforeach
+            </div>
+        @endif
+    </main>
 
-<footer>&copy; 2026 Herb Atlas — Natural Products from Morocco</footer>
+    <footer>&copy; 2026 Herb Atlas — Natural Products from Morocco</footer>
 
-<script>
-    function getDraftOrder() {
-        try {
-            const raw = localStorage.getItem('herb_order');
-            return raw ? JSON.parse(raw) : [];
-        } catch (error) {
-            return [];
+    <script>
+        function getDraftOrder() {
+            try {
+                const raw = localStorage.getItem('herb_order');
+                return raw ? JSON.parse(raw) : [];
+            } catch (error) {
+                return [];
+            }
         }
-    }
 
-    function getDraftOrderId() {
-        const stored = localStorage.getItem('herb_order_id');
-        if (stored) return stored;
+        function getDraftOrderId() {
+            const stored = localStorage.getItem('herb_order_id');
+            if (stored) return stored;
 
-        const generated = 'DRAFT-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
-        localStorage.setItem('herb_order_id', generated);
-        return generated;
-    }
+            const generated = 'DRAFT-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+            localStorage.setItem('herb_order_id', generated);
+            return generated;
+        }
 
-    function renderPending() {
-        const section = document.getElementById('pendingSection');
-        const cart = getDraftOrder();
+        function renderPending() {
+            const section = document.getElementById('pendingSection');
+            const cart = getDraftOrder();
 
-        if (!cart.length) {
-            section.innerHTML = `
+            if (!cart.length) {
+                section.innerHTML = `
                 <div class="empty-card">
                     <div class="empty-icon"><i class="fas fa-cart-plus"></i></div>
                     <h3>Your draft order is empty</h3>
                     <p>Add products to local storage from the product details page, then open the draft order details page from here.</p>
                     <a href="{{ route('product.index') }}"><i class="fas fa-arrow-right"></i> Browse Products</a>
                 </div>`;
-            return;
-        }
+                return;
+            }
 
-        const orderId = getDraftOrderId();
-        const normalized = cart.map(item => ({
-            id: item.id ?? item.product_id,
-            name: item.name ?? 'Unnamed Product',
-            image: item.image ?? item.picture ?? 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=150',
-            quantity: parseInt(item.quantity ?? 1, 10) || 1,
-            price: parseFloat(item.price ?? 0) || 0
-        }));
+            const orderId = getDraftOrderId();
+            const normalized = cart.map(item => ({
+                id: item.id ?? item.product_id,
+                name: item.name ?? 'Unnamed Product',
+                image: item.image ?? item.picture ?? 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=150',
+                quantity: parseInt(item.quantity ?? 1, 10) || 1,
+                price: parseFloat(item.price ?? 0) || 0
+            }));
 
-        const total = normalized.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const totalQty = normalized.reduce((sum, item) => sum + item.quantity, 0);
-        const visible = normalized.slice(0, 5);
-        const extra = normalized.length - visible.length;
-        const names = normalized.map(item => item.name).join(', ');
-        const dateStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            const total = normalized.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const totalQty = normalized.reduce((sum, item) => sum + item.quantity, 0);
+            const visible = normalized.slice(0, 5);
+            const extra = normalized.length - visible.length;
+            const names = normalized.map(item => item.name).join(', ');
+            const dateStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
-        let thumbsHTML = visible.map(item => `
+            let thumbsHTML = visible.map(item => `
             <div class="product-thumb-wrap" title="${item.name}">
                 <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=150'">
             </div>
         `).join('');
 
-        if (extra > 0) {
-            thumbsHTML += `<div class="more-badge">+${extra}</div>`;
-        }
+            if (extra > 0) {
+                thumbsHTML += `<div class="more-badge">+${extra}</div>`;
+            }
 
-        section.innerHTML = `
+            section.innerHTML = `
             <div class="pending-card">
                 <div class="card-top">
                     <div>
@@ -664,9 +688,10 @@
                     </div>
                 </div>
             </div>`;
-    }
+        }
 
-    renderPending();
-</script>
+        renderPending();
+    </script>
 </body>
+
 </html>
