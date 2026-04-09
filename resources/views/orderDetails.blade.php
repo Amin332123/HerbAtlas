@@ -296,6 +296,26 @@
             color: #fda4af;
         }
 
+        .hero-stat-value.warning {
+            color: #fde68a;
+        }
+
+        .hero-status.status-processing .status-dot {
+            background: var(--warning);
+        }
+
+        .hero-status.status-completed .status-dot {
+            background: var(--success);
+        }
+
+        .hero-status.status-cancelled .status-dot {
+            background: var(--danger);
+        }
+
+        .hero-status.status-default .status-dot {
+            background: #cbd5e1;
+        }
+
         .card {
             background: rgba(255, 255, 255, 0.96);
             border: 1px solid rgba(255, 255, 255, 0.7);
@@ -535,6 +555,36 @@
             padding: 28px;
             position: sticky;
             top: 110px;
+        }
+
+        .status-panel {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .status-pill {
+            border-radius: 18px;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, rgba(102, 191, 191, 0.08), rgba(247, 107, 138, 0.08));
+            border: 1px solid rgba(102, 191, 191, 0.14);
+        }
+
+        .status-pill .label {
+            display: block;
+            font-size: 0.72rem;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--gray);
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .status-pill .value {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--dark);
         }
 
         .summary-card::before {
@@ -778,7 +828,7 @@
 @php
     $isDraft = $isDraft ?? false;
     $orderItems = $orderItems ?? collect();
-    $draftOrderToken = $draftOrderToken ?? (session('draft_order_token') ?: localStorageFallbackTokenPlaceholder());
+    $draftOrderToken = $draftOrderToken ?? (session('draft_order_token') ?: 'localStorageFallbackTokenPlaceholder()');
 @endphp
 <header class="header">
     <a href="/" class="logo-container">
@@ -807,6 +857,21 @@
             $displayName = $order->name ?: ('Order #' . $order->id);
             $orderDate = optional($order->created_at)->format('d M Y');
             $orderDateFull = optional($order->created_at)->format('D, d F Y');
+            $pivotQuantities = $orderItems->map(fn ($item) => (int) data_get($item, 'pivot.quantity', 0));
+            $pivotPrices = $orderItems->map(fn ($item) => (float) data_get($item, 'pivot.price', 0));
+            $statusName = strtolower((string) ($order->status ?? 'completed'));
+            $orderStatusLabel = match ($statusName) {
+                'pending', 'processing', 'in_progress' => 'Processing',
+                'cancelled', 'canceled', 'failed' => 'Cancelled',
+                'completed', 'delivered', 'paid' => 'Completed',
+                default => 'Completed',
+            };
+            $statusClass = match ($statusName) {
+                'pending', 'processing', 'in_progress' => 'status-processing',
+                'cancelled', 'canceled', 'failed' => 'status-cancelled',
+                'completed', 'delivered', 'paid' => 'status-completed',
+                default => 'status-default',
+            };
         @endphp
 
         <div class="content-grid">
@@ -822,9 +887,9 @@
                                     <span><i class="fas fa-seedling"></i> Herb Atlas Collection</span>
                                 </div>
                             </div>
-                            <div class="hero-status status-confirmed">
+                            <div class="hero-status {{ $statusClass }}">
                                 <span class="status-dot"></span>
-                                Confirmed Order
+                                {{ $orderStatusLabel }}
                             </div>
                         </div>
 
@@ -942,14 +1007,33 @@
                         <span class="total-value">{{ number_format($grandTotal, 2) }} <span class="currency">MAD</span></span>
                     </div>
 
+                    <div class="status-panel">
+                        <div class="status-pill">
+                            <span class="label">Order Status</span>
+                            <span class="value">{{ $orderStatusLabel }}</span>
+                        </div>
+                        <div class="status-pill">
+                            <span class="label">Items Count</span>
+                            <span class="value">{{ $itemsCount }}</span>
+                        </div>
+                        <div class="status-pill">
+                            <span class="label">Products Total</span>
+                            <span class="value">{{ number_format($grandTotal, 2) }} MAD</span>
+                        </div>
+                        <div class="status-pill">
+                            <span class="label">Payment</span>
+                            <span class="value">Paid on Delivery</span>
+                        </div>
+                    </div>
+
                     <div class="summary-note">
-                        Your order has been saved to your account history. For any issue regarding delivery or product availability, please contact the Herb Atlas support team.
+                        This order is stored in your account history and reflects the saved database values from the order-product pivot table.
                     </div>
 
                     <div class="actions-bar">
-                        <a href="{{ route('orders.index') }}" class="btn-primary">
-                            <i class="fas fa-arrow-left"></i>
-                            Return to Orders
+                        <a href="{{ url('/products') }}" class="btn-primary">
+                            <i class="fas fa-leaf"></i>
+                            Continue Shopping
                         </a>
                     </div>
                 </section>
@@ -962,13 +1046,16 @@
 
 <footer>&copy; 2026 Herb Atlas — Natural Products from Morocco</footer>
 
-@if ($isDraft)
+    @if ($isDraft)
 <script>
     const draftOrderRoot = document.getElementById('draft-order-root');
     const draftOrderStorageKey = 'herb_order';
     const draftOrderToken = @json($draftOrderToken ?: 'draft');
     const draftBackUrl = @json(route('orders.index'));
     const productsUrl = @json(url('/products'));
+    const checkoutUrl = @json(route('orders.checkout'));
+    const csrfToken = @json(csrf_token());
+    const orderLookupUrl = @json(url('/orders'));
 
     function formatMoney(value) {
         const numericValue = Number(value || 0);
@@ -1035,6 +1122,59 @@
         }
     }
 
+    async function completeCheckout() {
+        const items = loadDraftOrder();
+
+        if (!items.length) {
+            window.alert('Your cart is empty');
+            return;
+        }
+
+        const button = document.querySelector('.btn-checkout');
+
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        }
+
+        try {
+            const response = await fetch(checkoutUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    items: items
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to store order');
+            }
+
+            if (data.message === 'data stored') {
+                localStorage.removeItem(draftOrderStorageKey);
+                localStorage.removeItem('herb_order_id');
+                window.alert('data stored');
+                window.location.href = '/orders/' + data.order_id;
+                return;
+            }
+
+            throw new Error('Unexpected response from server');
+        } catch (error) {
+            window.alert(error.message || 'Failed to store order');
+        } finally {
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-credit-card"></i> Complete Order';
+            }
+        }
+    }
+
     function buildEmptyState() {
         draftOrderRoot.innerHTML = `
             <div class="empty-box">
@@ -1059,8 +1199,10 @@
         const items = loadDraftOrder();
 
         if (!items.length) {
-            buildEmptyState();
-            return;
+            if (!draftOrderToken || draftOrderToken === 'draft') {
+                buildEmptyState();
+                return;
+            }
         }
 
         const itemsCount = items.length;
@@ -1225,10 +1367,35 @@
         `;
     }
 
+    function renderSavedOrderFallback() {
+        draftOrderRoot.innerHTML = `
+            <div class="empty-box">
+                <div class="icon"><i class="fas fa-box-open"></i></div>
+                <h2 class="empty-title">Order not found</h2>
+                <p class="empty-text">The saved database order could not be loaded right now. Please return to your orders list or continue browsing products.</p>
+                <div class="empty-actions">
+                    <a href="${orderLookupUrl}" class="btn-primary" style="width:auto;padding-left:22px;padding-right:22px;">
+                        <i class="fas fa-receipt"></i>
+                        View Orders
+                    </a>
+                    <a href="${productsUrl}" class="btn-secondary-link">
+                        <i class="fas fa-arrow-left"></i>
+                        Browse Products
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+
     window.removeDraftItem = removeDraftItem;
     window.clearDraftOrder = clearDraftOrder;
+    window.completeCheckout = completeCheckout;
 
-    renderDraftOrder();
+    if (!loadDraftOrder().length && draftOrderToken && draftOrderToken !== 'draft') {
+        renderSavedOrderFallback();
+    } else {
+        renderDraftOrder();
+    }
 </script>
 @endif
 </body>

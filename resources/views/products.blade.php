@@ -42,11 +42,6 @@
             margin-top: 15px;
         }
 
-        /* --- Header --- */
-      
-
-
-        /* --- Main Content & Grid --- */
         .main-content {
             max-width: 1400px;
             margin: 0 auto;
@@ -120,7 +115,6 @@
             margin: 10px 0;
         }
 
-        /* --- Buttons --- */
         .details-btn {
             flex: 1;
             padding: 12px;
@@ -180,7 +174,6 @@
             transform: scale(1.05);
         }
 
-        /* --- Toast --- */
         .toast-container {
             position: fixed;
             top: 100px;
@@ -210,7 +203,6 @@
             }
         }
 
-        /* --- Search & Filter Section --- */
         .search-section {
             max-width: 1400px;
             margin: 0 auto;
@@ -317,7 +309,6 @@
             margin-right: 8px;
         }
 
-        /* --- Forms --- */
         .form-input,
         .form-select,
         .form-textarea {
@@ -395,7 +386,6 @@
             margin-bottom: 20px;
         }
 
-        /* --- Create Modal (multiple image upload) --- */
         .modal {
             display: none;
             position: fixed;
@@ -455,7 +445,6 @@
             color: var(--coral);
         }
 
-        /* Image upload area */
         .upload-container {
             margin-bottom: 25px;
         }
@@ -540,34 +529,6 @@
             background: white;
             transform: translateY(-2px);
         }
-
-        @media (max-width: 850px) {
-            .header {
-                padding: 15px 20px;
-            }
-
-            .nav-menu {
-                gap: 15px;
-            }
-
-            .search-section {
-                padding: 20px;
-            }
-
-            .main-content {
-                padding: 20px;
-            }
-
-            .filter-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .modal-content {
-                padding: 30px 20px;
-            }
-        }
-
 
         .ai-generator {
             margin-top: 12px;
@@ -671,13 +632,83 @@
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
+
+        .products-message {
+            display: none;
+            margin: 20px 60px 0;
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: white;
+            border: 1px solid rgba(102, 191, 191, 0.2);
+            color: var(--dark);
+            box-shadow: 0 4px 15px rgba(102, 191, 191, 0.08);
+        }
+
+        .products-message.is-visible {
+            display: block;
+        }
+
+        .products-message.is-error {
+            border-color: rgba(247, 107, 138, 0.35);
+            color: var(--coral);
+        }
+
+        .products-message.is-success {
+            border-color: rgba(102, 191, 191, 0.35);
+            color: var(--teal);
+        }
+
+        .loading-overlay {
+            display: none;
+            margin: 20px 0 0;
+            font-size: 0.95rem;
+            color: var(--gray);
+        }
+
+        .loading-overlay.is-visible {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .loading-overlay i {
+            color: var(--teal);
+        }
+
+        @media (max-width: 850px) {
+            .header {
+                padding: 15px 20px;
+            }
+
+            .nav-menu {
+                gap: 15px;
+            }
+
+            .search-section {
+                padding: 20px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+
+            .products-message {
+                margin: 20px 20px 0;
+            }
+        }
     </style>
 </head>
 
 <body>
-
-    <!-- Header with Create Product Button -->
-
 
     <x-header />
 
@@ -687,46 +718,44 @@
         @endif
     </div>
 
-    <!-- Search & Filter Section (no js, pure forms) -->
     <div class="search-section">
-        <!-- Search form -->
-        <form method="GET" action="{{ url('/products') }}" class="search-bar-container">
+        <form method="GET" action="{{ url('/products') }}" class="search-bar-container" id="productsSearchForm">
             <div class="search-input-wrapper">
                 <i class="fas fa-search"></i>
                 <input type="text" name="search" class="search-input" id="searchInput"
-                    placeholder="Search for herbs, remedies, essential oils..." value="{{ request('search') }}">
+                    placeholder="Search for herbs, remedies, essential oils..." value="{{ request('search') }}" autocomplete="off">
             </div>
             <button type="submit" class="search-btn">
                 <i class="fas fa-search"></i> Search
             </button>
         </form>
 
-        <!-- Category filter bar (no js) -->
         <div class="filter-bar">
-            <form method="GET" action="{{ url('/products') }}" style="display: flex; gap: 10px; align-items: center;">
-                <!-- Preserve search parameter if any -->
+            <form method="GET" action="{{ url('/products') }}" id="categoryFilterForm" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 @if(request('search'))
                     <input type="hidden" name="search" value="{{ request('search') }}">
                 @endif
-                <select name="category" class="category-select">
+                <select name="category" class="category-select" id="categorySelect">
+                    <option value="">All Categories</option>
                     @foreach ($categories as $category)
-                        <option value="{{ $category->title }}">{{ $category->title }}</option>
-
+                        <option value="{{ $category->title }}" @selected(request('category') === $category->title)>{{ $category->title }}</option>
                     @endforeach
                 </select>
-                <button type="submit" class="filter-btn"><i class="fas fa-filter"></i> Apply Category</button>
+                <button type="submit" class="filter-btn" id="categoryFilterButton"><i class="fas fa-filter"></i> Apply Category</button>
             </form>
+        </div>
+
+        <div class="products-message" id="productsMessage" aria-live="polite" role="status"></div>
+        <div class="loading-overlay" id="productsLoading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Loading products...</span>
         </div>
     </div>
 
-
-
-
-
     @if($errors->any())
-        <div style="background: #fee; padding: 15px; border-radius: 8px; margin-bottom: 20px; z-index: 1000;">
+        <div class="products-message is-visible is-error" style="margin-top: 20px;">
             <strong>Validation Errors:</strong>
-            <ul>
+            <ul style="margin: 10px 0 0 18px;">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -758,18 +787,15 @@
                     </div>
 
                     <div class="card-actions">
-                        <!-- Details as a link (no modal) -->
                         <a href="{{ url('/products/' . $product->id) }}" class="details-btn">
                             <i class="fas fa-info-circle"></i> Details
                         </a>
 
-                        <!-- Edit link -->
                         <a href="{{ url('/products/' . $product->id . '/edit') }}" class="edit-btn"
                             onclick="event.preventDefault(); alert('Edit link would go to edit page');">
                             <i class="fas fa-edit"></i>
                         </a>
 
-                        <!-- Delete form -->
                         <form action="{{ route('products.destroy', $product->id) }}" method="POST">
                             @csrf
                             @method('DELETE')
@@ -791,7 +817,6 @@
         </div>
     </main>
 
-    <!-- Create Product Modal (with multiple image upload & previews) -->
     <div class="modal" id="createProductModal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeCreateModal()">&times;</button>
@@ -807,7 +832,6 @@
                 onsubmit="handleCreateSubmit(event)" enctype="multipart/form-data">
                 @csrf
 
-                <!-- Name Field -->
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">
                         <i class="fas fa-tag" style="color: var(--teal); margin-right: 5px;"></i>Herb Name *
@@ -816,7 +840,6 @@
                         placeholder="e.g., Lavender, Chamomile, Peppermint..." class="form-input">
                 </div>
 
-                <!-- Stock & Price Row -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                     <div>
                         <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">
@@ -834,7 +857,6 @@
                     </div>
                 </div>
 
-                <!-- Category Selection -->
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">
                         <i class="fas fa-folder" style="color: var(--teal); margin-right: 5px;"></i>Category *
@@ -847,7 +869,6 @@
                     </select>
                 </div>
 
-                <!-- Description Field -->
                 <div class="form-group">
                     <label class="form-label">
                         <i class="fas fa-align-left"></i> Description <span style="color: var(--coral);">*</span>
@@ -856,7 +877,6 @@
                         placeholder="Describe the herb, its benefits, uses, and characteristics..."
                         class="form-textarea"></textarea>
 
-                    <!-- AI Description Generator -->
                     <div class="ai-generator">
                         <button type="button" class="ai-toggle-btn" onclick="toggleAiInput()">
                             <i class="fas fa-magic"></i> Generate with AI
@@ -871,22 +891,19 @@
                         </div>
                     </div>
                 </div>
-                <!-- Multiple Image Upload Area (with JS previews) -->
+
                 <div class="upload-container" style="margin-bottom: 25px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">
                         <i class="fas fa-images" style="color: var(--teal); margin-right: 5px;"></i>Herb Images (you can
                         add multiple)
                     </label>
                     <div id="image-upload-rows">
-                        <!-- Initial row -->
                         <div class="upload-row" id="upload-row-0">
                             <div class="file-input-wrapper">
                                 <input type="file" name="images[]" accept="image/*" class="image-input"
                                     onchange="previewImage(this, 0)">
                             </div>
-                            <div class="preview-wrapper" id="preview-wrapper-0">
-                                <!-- Preview and remove button will be injected here -->
-                            </div>
+                            <div class="preview-wrapper" id="preview-wrapper-0"></div>
                         </div>
                     </div>
                     <button type="button" class="add-more-btn" onclick="addImageRow()">
@@ -896,7 +913,6 @@
                         Click the remove button to delete a picture.</p>
                 </div>
 
-                <!-- Form Actions -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <button type="button" onclick="closeCreateModal()" class="cancel-btn">
                         <i class="fas fa-times"></i> Cancel
@@ -910,7 +926,6 @@
     </div>
 
     <script>
-
         function toggleAiInput() {
             const aiInputArea = document.getElementById('aiInputArea');
             aiInputArea.classList.toggle('active');
@@ -958,9 +973,8 @@
             }
         }
 
-
-        // ----- Create Modal JS (only for modal display & image upload) -----
-        let imageRowCounter = 1; // start from 1 because we have row 0
+        let imageRowCounter = 1;
+        let productsRequestController = null;
 
         function openCreateModal() {
             document.getElementById('createProductModal').classList.add('active');
@@ -971,18 +985,15 @@
             document.getElementById('createProductModal').classList.remove('active');
             document.body.style.overflow = 'auto';
             document.getElementById('createProductForm').reset();
-            // Clear all upload rows except the first
             const container = document.getElementById('image-upload-rows');
-            container.innerHTML = ''; // remove all
-            // Re-add initial empty row
-            addImageRow(true); // force reset to single row
+            container.innerHTML = '';
+            addImageRow(true);
         }
 
-        // Add a new image upload row
         function addImageRow(reset = false) {
             const container = document.getElementById('image-upload-rows');
             if (reset) {
-                container.innerHTML = ''; // clear
+                container.innerHTML = '';
                 imageRowCounter = 0;
             }
             const rowId = imageRowCounter;
@@ -998,27 +1009,23 @@
             imageRowCounter++;
         }
 
-        // Preview image when file selected
         function previewImage(input, rowId) {
             const wrapper = document.getElementById(`preview-wrapper-${rowId}`);
-            wrapper.innerHTML = ''; // clear previous preview
+            wrapper.innerHTML = '';
 
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                    // Create image preview
                     const img = document.createElement('img');
                     img.src = e.target.result;
                     img.className = 'image-preview';
                     img.alt = 'Preview';
 
-                    // Create remove button
                     const removeBtn = document.createElement('button');
                     removeBtn.type = 'button';
                     removeBtn.className = 'remove-image-btn';
                     removeBtn.innerHTML = '<i class="fas fa-times"></i>';
                     removeBtn.onclick = function () {
-                        // Clear the file input and remove preview
                         input.value = '';
                         wrapper.innerHTML = '';
                     };
@@ -1030,9 +1037,6 @@
             }
         }
 
-
-
-        // Close modal if clicked outside
         window.onclick = function (event) {
             const createModal = document.getElementById('createProductModal');
             if (event.target === createModal) {
@@ -1040,31 +1044,18 @@
             }
         };
 
-        // Initialize with one row if not present (ensures at least one)
         window.addEventListener('DOMContentLoaded', function () {
             const container = document.getElementById('image-upload-rows');
             if (container.children.length === 0) {
                 addImageRow(true);
             }
+
+            initializeProductsAjax();
         });
-
-
-
-
-
-
-
-
-
-
-
-
-        // Inside your script tag or a separate file
 
         document.getElementById('createProductForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            // --- Client-side validation (quick checks) ---
             const name = document.getElementById('productName').value.trim();
             const stock = document.getElementById('productStock').value.trim();
             const price = document.getElementById('productPrice').value.trim();
@@ -1084,7 +1075,6 @@
                 return;
             }
 
-            // File validation (optional: type/size can also be checked here)
             const fileInputs = document.querySelectorAll('.image-input');
             for (let input of fileInputs) {
                 if (input.files.length > 0) {
@@ -1100,15 +1090,194 @@
                 }
             }
 
-
-
             e.currentTarget.submit();
-
-
-
         });
 
+        function initializeProductsAjax() {
+            const searchForm = document.getElementById('productsSearchForm');
+            const categoryForm = document.getElementById('categoryFilterForm');
+            const searchInput = document.getElementById('searchInput');
+            const categorySelect = document.getElementById('categorySelect');
 
+            const submitHandler = function (event) {
+                event.preventDefault();
+                fetchProducts();
+            };
+
+            searchForm.addEventListener('submit', submitHandler);
+            categoryForm.addEventListener('submit', submitHandler);
+
+            let searchTimer = null;
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(fetchProducts, 350);
+            });
+
+            categorySelect.addEventListener('change', function () {
+                fetchProducts();
+            });
+        }
+
+        async function fetchProducts() {
+            const searchInput = document.getElementById('searchInput');
+            const categorySelect = document.getElementById('categorySelect');
+            const productsGrid = document.getElementById('productsGrid');
+            const productsMessage = document.getElementById('productsMessage');
+            const productsLoading = document.getElementById('productsLoading');
+
+            const search = searchInput.value.trim();
+            const category = categorySelect.value.trim();
+
+            if (productsRequestController) {
+                productsRequestController.abort();
+            }
+            productsRequestController = new AbortController();
+
+            productsLoading.classList.add('is-visible');
+            productsMessage.className = 'products-message';
+            productsMessage.textContent = '';
+            productsMessage.classList.remove('is-visible');
+
+            try {
+                const url = new URL("{{ route('products.index') }}", window.location.origin);
+                if (search) {
+                    url.searchParams.set('search', search);
+                }
+                if (category) {
+                    url.searchParams.set('category', category);
+                }
+                url.searchParams.set('ajax', '1');
+
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    signal: productsRequestController.signal
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    renderProductsMessage(getErrorMessage(data), 'error');
+                    if (data.errors) {
+                        return;
+                    }
+                    return;
+                }
+
+                renderProductsGrid(data.products || []);
+                if ((data.products || []).length === 0) {
+                    renderProductsMessage(data.message || 'No products matched your search.', 'success');
+                } else {
+                    productsMessage.className = 'products-message';
+                    productsMessage.textContent = '';
+                    productsMessage.classList.remove('is-visible');
+                }
+
+                if (history.replaceState) {
+                    const newUrl = new URL(window.location.href);
+                    if (search) {
+                        newUrl.searchParams.set('search', search);
+                    } else {
+                        newUrl.searchParams.delete('search');
+                    }
+                    if (category) {
+                        newUrl.searchParams.set('category', category);
+                    } else {
+                        newUrl.searchParams.delete('category');
+                    }
+                    history.replaceState({}, '', newUrl.toString());
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    return;
+                }
+                renderProductsMessage('Unable to load products right now. Please try again.', 'error');
+            } finally {
+                productsLoading.classList.remove('is-visible');
+            }
+        }
+
+        function renderProductsGrid(products) {
+            const productsGrid = document.getElementById('productsGrid');
+
+            if (!products.length) {
+                productsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-leaf"></i>
+                        <p>No herbs matched your current search.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            productsGrid.innerHTML = products.map(function (product) {
+                const image = product.image ? `<img src="${product.image}" class="product-image" alt="${escapeHtml(product.name)}">` : '';
+                return `
+                    <div class="product-card" data-category="${escapeHtml(product.category || 'medicinal')}" data-price="${escapeHtml(String(product.price ?? ''))}">
+                        ${image}
+                        <h3>${escapeHtml(product.name || '')}</h3>
+                        <p>${escapeHtml(product.description_excerpt || product.description || '')}</p>
+                        <div class="stock-info">
+                            <i class="fas fa-boxes"></i> Stock: <strong>${escapeHtml(String(product.stock ?? '0'))}</strong>
+                        </div>
+                        <div class="price-tag">${escapeHtml(String(product.price ?? '0'))} MAD</div>
+                        <div class="card-actions">
+                            <a href="${product.details_url}" class="details-btn">
+                                <i class="fas fa-info-circle"></i> Details
+                            </a>
+                            <a href="${product.edit_url}" class="edit-btn" onclick="event.preventDefault(); alert('Edit link would go to edit page');">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form action="${product.delete_url}" method="POST">
+                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="delete-btn">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderProductsMessage(message, type) {
+            const productsMessage = document.getElementById('productsMessage');
+            productsMessage.className = 'products-message is-visible ' + (type === 'error' ? 'is-error' : 'is-success');
+            productsMessage.innerHTML = message;
+        }
+
+        function getErrorMessage(data) {
+            if (data && data.message) {
+                return escapeHtml(data.message);
+            }
+
+            if (data && data.errors) {
+                const messages = [];
+                Object.keys(data.errors).forEach(function (key) {
+                    const values = data.errors[key];
+                    if (Array.isArray(values)) {
+                        values.forEach(function (value) {
+                            messages.push(escapeHtml(value));
+                        });
+                    }
+                });
+                return messages.length ? `<strong>Validation Errors:</strong><ul style="margin: 10px 0 0 18px;">${messages.map(function (message) { return `<li>${message}</li>`; }).join('')}</ul>` : 'Validation failed.';
+            }
+
+            return 'Something went wrong while loading products.';
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&')
+                .replace(/</g, '<')
+                .replace(/>/g, '>')
+                .replace(/"/g, '"')
+                .replace(/'/g, '&#039;');
+        }
 
         function showToast(message, type = 'success') {
             const toastContainer = document.getElementById('toastContainer');

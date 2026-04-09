@@ -7,7 +7,7 @@
         <a href="{{ route('dashboard') }}" class="nav-link active">Dashboard</a>
         <a href="{{ route('profile.show') }}" class="nav-link">Profile</a>
         <a href="{{ route('orders.index') }}" class="nav-link">My Orders</a>
-        <a href="{{ route('product.index') }}" class="nav-link">Products</a>
+        <a href="{{ route('products.index') }}" class="nav-link">Products</a>
         <a href="chat.html" class="nav-link">Chat</a>
         <button onclick="openCreateModal()" class="create-product-btn">
             <i class="fas fa-plus-circle"></i> Create Product

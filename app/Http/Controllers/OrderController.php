@@ -73,33 +73,39 @@ class OrderController extends Controller
     {
         $items = $request->input('items');
 
-        if (empty($items)) {
+        if (!is_array($items) || empty($items)) {
             return response()->json(['message' => 'Your cart is empty'], 422);
         }
 
         return DB::transaction(function () use ($items) {
             $order = new Order();
             $order->user_id = auth()->id();
-            $order->status = 'confirmed';
+            $order->name = 'Order #' . now()->format('YmdHis');
             $order->save();
 
             foreach ($items as $item) {
-                $product = Product::findOrFail($item['id']);
-                
-                // Deduct Stock
-                $product->decrement('stock', $item['quantity']);
+                $productId = $item['id'] ?? null;
+                $quantity = max(1, (int) ($item['quantity'] ?? 1));
+
+                if (!$productId) {
+                    continue;
+                }
+
+                $product = Product::findOrFail($productId);
 
                 $order->products()->attach($product->id, [
-                    'quantity' => $item['quantity'],
-                    'price' => $product->price,
+                    'quantity' => $quantity,
+                    'price' => $product->price * $quantity,
                 ]);
             }
 
             return response()->json([
-                'success' => true,
+                'message' => 'data stored',
                 'order_id' => $order->id,
-                'message' => 'Order placed successfully!'
             ]);
         });
     }
 }
+
+
+
