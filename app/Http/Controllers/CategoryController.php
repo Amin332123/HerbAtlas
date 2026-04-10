@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCategoryRequest;
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -48,6 +50,40 @@ class CategoryController extends Controller
                     'title' => $category->title,
                 ],
             ], 201);
+        }
+
+        return back()->with('success', $message);
+    }
+
+    public function destroy(Request $request, Category $category): JsonResponse|RedirectResponse
+    {
+        $hasProducts = Product::query()
+            ->where('category_id', $category->id)
+            ->exists();
+
+        if ($hasProducts) {
+            $message = 'This category cannot be deleted because it is used by one or more products.';
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $message,
+                ], 422);
+            }
+
+            return back()->with('error', $message);
+        }
+
+        DB::transaction(function () use ($category): void {
+            $category->delete();
+        });
+
+        $message = 'Category deleted successfully.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $message,
+                'category_id' => $category->id,
+            ], 200);
         }
 
         return back()->with('success', $message);

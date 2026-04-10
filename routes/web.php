@@ -56,10 +56,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('/products/{id}', [ProductController::class, 'show'])->name('product.show');
     Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
-    Route::get('/products/{id}/update', [ProductController::class, 'edit'])->name('products.update.form');
     Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
