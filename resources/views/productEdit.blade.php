@@ -255,7 +255,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data" id="updateProductForm">
+            <form action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data" id="updateProductForm" onsubmit="return validateUpdateForm()">
                 @csrf
                 @method('PUT')
 
@@ -346,6 +346,107 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <script>
+        let imageRowCounter = 1;
+
+        function addImageRow() {
+            const container = document.getElementById('image-upload-rows');
+            const rowId = imageRowCounter;
+            container.insertAdjacentHTML('beforeend', `
+                <div class="upload-row" id="upload-row-${rowId}">
+                    <div class="file-input-wrapper">
+                        <input type="file" name="images[]" accept="image/*" class="image-input" onchange="previewImage(this, ${rowId})">
+                    </div>
+                    <div class="preview-wrapper" id="preview-wrapper-${rowId}"></div>
+                </div>
+            `);
+            imageRowCounter++;
+        }
+
+        function previewImage(input, rowId) {
+            const wrapper = document.getElementById(`preview-wrapper-${rowId}`);
+            wrapper.innerHTML = '';
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                if (!file.type.startsWith('image/')) {
+                    alert('Only image files are allowed.');
+                    input.value = '';
+                    return;
+                }
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Each image must be 2MB or less.');
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'image-preview';
+                    img.alt = 'Preview';
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'remove-image-btn';
+                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    removeBtn.onclick = function () {
+                        input.value = '';
+                        wrapper.innerHTML = '';
+                    };
+
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(removeBtn);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function validateUpdateForm() {
+            const name = document.getElementById('name').value.trim();
+            const stock = document.getElementById('stock').value.trim();
+            const price = document.getElementById('price').value.trim();
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value.trim();
+
+            if (!name || !stock || !price || !category || !description) {
+                alert('All fields are required.');
+                return false;
+            }
+
+            if (Number(stock) < 0 || Number.isNaN(Number(stock))) {
+                alert('Stock must be a valid positive number.');
+                return false;
+            }
+
+            if (Number(price) <= 0 || Number.isNaN(Number(price))) {
+                alert('Price must be a valid positive number.');
+                return false;
+            }
+
+            const fileInputs = document.querySelectorAll('.image-input');
+            for (const input of fileInputs) {
+                if (!input.files || !input.files.length) continue;
+                const file = input.files[0];
+                if (!file.type.startsWith('image/')) {
+                    alert('Only image files are allowed.');
+                    return false;
+                }
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Each image must be 2MB or less.');
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    </script>
+</body>
+</html>
         </div>
     </div>
 

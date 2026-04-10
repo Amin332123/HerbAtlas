@@ -309,6 +309,67 @@
             margin-right: 8px;
         }
 
+        .category-card-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .category-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: #f9ffff;
+            border: 1px solid rgba(102, 191, 191, 0.2);
+            border-radius: 16px;
+            padding: 14px 16px;
+            box-shadow: 0 4px 14px rgba(102, 191, 191, 0.08);
+        }
+
+        .category-card-name {
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 0.95rem;
+            word-break: break-word;
+        }
+
+        .category-card-delete {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 10px;
+            background: #ffe5e9;
+            color: var(--coral);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .category-card-delete:hover {
+            background: #ffd5dc;
+            transform: scale(1.05);
+        }
+
+        .category-card-delete:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .category-empty-state {
+            padding: 18px;
+            border: 1px dashed rgba(102, 191, 191, 0.35);
+            border-radius: 16px;
+            text-align: center;
+            color: var(--gray);
+            background: #fbffff;
+        }
+
         .form-input,
         .form-select,
         .form-textarea {
@@ -731,7 +792,7 @@
         </form>
 
         <div class="filter-bar">
-            <form method="GET" action="{{ url('/products') }}" id="categoryFilterForm" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <form method="GET" action="{{ url('/products') }}" id="categoryFilterForm" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; width: 100%;">
                 @if(request('search'))
                     <input type="hidden" name="search" value="{{ request('search') }}">
                 @endif
@@ -743,6 +804,7 @@
                 </select>
                 <button type="submit" class="filter-btn" id="categoryFilterButton"><i class="fas fa-filter"></i> Apply Category</button>
                 <button type="button" class="filter-btn" onclick="openCreateCategoryModal()"><i class="fas fa-plus"></i> Create Category</button>
+                <button type="button" class="filter-btn" onclick="openManageCategoriesModal()"><i class="fas fa-trash"></i> Manage Categories</button>
             </form>
         </div>
 
@@ -925,6 +987,33 @@
         </div>
     </div>
 
+    <div class="modal" id="manageCategoriesModal">
+        <div class="modal-content">
+            <button class="modal-close" type="button" onclick="closeManageCategoriesModal()">&times;</button>
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 style="color: var(--teal); font-family: 'Playfair Display'; font-size: 2.2rem;">
+                    <i class="fas fa-layer-group" style="margin-right: 10px;"></i>Manage Categories
+                </h2>
+                <p style="color: var(--gray);">Delete categories directly without page reloads</p>
+            </div>
+
+            <div class="category-card-list" id="categoryCardList">
+                @forelse ($categories as $category)
+                    <div class="category-card" data-category-id="{{ $category->id }}" data-category-title="{{ $category->title }}">
+                        <span class="category-card-name">{{ $category->title }}</span>
+                        <button type="button" class="category-card-delete" onclick="deleteCategory({{ $category->id }}, @js($category->title), this)" aria-label="Delete {{ $category->title }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                @empty
+                    <div class="category-empty-state" id="categoryEmptyState">
+                        No categories available.
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="createCategoryModal">
         <div class="modal-content">
             <button class="modal-close" type="button" onclick="closeCreateCategoryModal()">&times;</button>
@@ -1033,6 +1122,16 @@
             document.getElementById('createCategoryForm').reset();
         }
 
+        function openManageCategoriesModal() {
+            document.getElementById('manageCategoriesModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeManageCategoriesModal() {
+            document.getElementById('manageCategoriesModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
         function addImageRow(reset = false) {
             const container = document.getElementById('image-upload-rows');
             if (reset) {
@@ -1083,11 +1182,15 @@
         window.onclick = function (event) {
             const createModal = document.getElementById('createProductModal');
             const createCategoryModal = document.getElementById('createCategoryModal');
+            const manageCategoriesModal = document.getElementById('manageCategoriesModal');
             if (event.target === createModal) {
                 closeCreateModal();
             }
             if (event.target === createCategoryModal) {
                 closeCreateCategoryModal();
+            }
+            if (event.target === manageCategoriesModal) {
+                closeManageCategoriesModal();
             }
         };
 
@@ -1169,11 +1272,11 @@
         function initializeCategoryForm() {
             const form = document.getElementById('createCategoryForm');
             const titleInput = document.getElementById('categoryTitleInput');
+            const categoryRegex = /^[A-Za-z0-9][A-Za-z0-9\s&()\-,'".]{1,78}[A-Za-z0-9)]?$/;
 
             form.addEventListener('submit', function (event) {
                 const rawTitle = titleInput.value.trim();
                 const normalizedTitle = rawTitle.replace(/\s+/g, ' ');
-                const categoryRegex = /^[A-Za-z0-9][A-Za-z0-9\s&()\-,'".]{1,78}[A-Za-z0-9)]?$/;
 
                 if (!normalizedTitle) {
                     event.preventDefault();
@@ -1190,6 +1293,100 @@
                 titleInput.value = normalizedTitle;
             });
         }
+
+        function getSelectedCategoryTitle() {
+            const select = document.getElementById('categorySelect');
+            return select ? select.value.trim() : '';
+        }
+
+        function deleteSelectedCategory() {
+            showToast('Use the Manage Categories modal to delete categories', 'error');
+        }
+
+        async function deleteCategory(categoryId, categoryTitle, button = null) {
+            if (!categoryId) {
+                showToast('Selected category not found', 'error');
+                return;
+            }
+
+            try {
+                if (button) {
+                    button.disabled = true;
+                }
+
+                const response = await fetch("{{ route('categories.destroy', ['category' => '__CATEGORY__']) }}".replace('__CATEGORY__', encodeURIComponent(categoryId)), {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showToast(data.message || 'Unable to delete category', 'error');
+                    return;
+                }
+
+                removeCategoryOption(categoryTitle);
+                removeCategoryCard(categoryId);
+                document.getElementById('categorySelect').value = '';
+                showToast(data.message || 'Category deleted successfully');
+            } catch (error) {
+                showToast('Unable to delete category right now', 'error');
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                }
+            }
+        }
+
+        function removeCategoryOption(categoryTitle) {
+            const selects = [
+                document.getElementById('categorySelect'),
+                document.getElementById('productCategory')
+            ];
+
+            selects.forEach(function (select) {
+                if (!select) {
+                    return;
+                }
+
+                Array.from(select.options).forEach(function (option) {
+                    if (option.value === categoryTitle) {
+                        option.remove();
+                    }
+                });
+            });
+        }
+
+        function removeCategoryCard(categoryId) {
+            const cardList = document.getElementById('categoryCardList');
+            if (!cardList) {
+                return;
+            }
+
+            const cards = cardList.querySelectorAll('.category-card');
+            cards.forEach(function (card) {
+                if (card.dataset.categoryId === String(categoryId)) {
+                    card.remove();
+                }
+            });
+
+            const remainingCards = cardList.querySelectorAll('.category-card');
+            const currentEmptyState = document.getElementById('categoryEmptyState');
+
+            if (remainingCards.length === 0 && !currentEmptyState) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'category-empty-state';
+                emptyState.id = 'categoryEmptyState';
+                emptyState.textContent = 'No categories available.';
+                cardList.appendChild(emptyState);
+            }
+        }
+
 
         async function fetchProducts() {
             const searchInput = document.getElementById('searchInput');
