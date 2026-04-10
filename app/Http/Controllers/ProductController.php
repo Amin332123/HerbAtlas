@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductSearchRequest;
 use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Picture;
 use App\Models\Product;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -64,41 +65,55 @@ class ProductController extends Controller
 
     public function edit($id)
     {
-        $product = Product::with('pictures')->findOrFail($id);
+        $product = Product::with(['pictures', 'category'])->findOrFail($id);
         $categories = Category::all();
+
         return view('productEdit', compact('product', 'categories'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateProductRequest $request, $id)
     {
-        $product = Product::findOrFail($id);
-        $category = Category::where('title', $request->category)->first();
+        $product = Product::with('pictures')->findOrFail($id);
+        $category = Category::where('title', $request->category)->firstOrFail();
 
-        $product->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'stock' => $request->stock,
-            'category_id' => $category->id,
-        ]);
+        DB::transaction(function () use ($request, $product, $category) {
+            $product->update([
+                'name' => $request->name,
+                'description' => $request->description,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'category_id' => $category->id,
+            ]);
 
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('products', 'public');
-                Picture::create(['product_id' => $product->id, 'img_path' => $path]);
+            $deletedPictures = $request->input('deleted_pictures', []);
+            if (!empty($deletedPictures)) {
+                $picturesToDelete = $product->pictures()->whereIn('id', $deletedPictures)->get();
+
+                foreach ($picturesToDelete as $picture) {
+                    if (Storage::disk('public')->exists($picture->img_path)) {
+                        Storage::disk('public')->delete($picture->img_path);
+                    }
+                    $picture->delete();
+                }
             }
-        }
 
-        return redirect()->route('product.index')->with('success', 'Product updated successfully!');
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $path = $image->store('products', 'public');
+                    Picture::create([
+                        'product_id' => $product->id,
+                        'img_path' => $path,
+                    ]);
+                }
+            }
+        });
+
+        return redirect()->route('products.index')->with('success', 'Product updated successfully!');
     }
 
     public function store(StoreProductRequest $request)
     {
-
-
-
-        $category = Category::where('title', $request->category)->first();
-
+        $category = Category::where('title', $request->category)->firstOrFail();
 
         $product = Product::create([
             'name' => $request->name,
@@ -107,7 +122,6 @@ class ProductController extends Controller
             'stock' => $request->stock,
             'category_id' => $category->id,
         ]);
-        $product->refresh();
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
@@ -120,11 +134,7 @@ class ProductController extends Controller
             }
         }
 
-
-        return back();
-
-
-
+        return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
 
 
@@ -139,17 +149,24 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        DB::transaction(function () use ($product) {
+            $product->load(['pictures', 'feedbacks', 'reports', 'orders']);
 
-        foreach ($product->pictures as $picture) {
-          
-            if (Storage::disk('public')->exists($picture->img_path)) {
-                Storage::disk('public')->delete($picture->img_path);
+            foreach ($product->pictures as $picture) {
+                if (Storage::disk('public')->exists($picture->img_path)) {
+                    Storage::disk('public')->delete($picture->img_path);
+                }
+                $picture->delete();
             }
-            $picture->delete();
-        }
-        $product->delete();
 
-        return redirect()->route('product.index')->with('success', 'Product and all associated images removed successfully.');
+            $product->orders()->detach();
+            $product->feedbacks()->delete();
+            $product->reports()->delete();
+
+            $product->delete();
+        });
+
+        return redirect()->route('products.index')->with('success', 'Product and all associated images removed successfully.');
     }
 
 

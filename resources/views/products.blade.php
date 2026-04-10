@@ -742,6 +742,7 @@
                     @endforeach
                 </select>
                 <button type="submit" class="filter-btn" id="categoryFilterButton"><i class="fas fa-filter"></i> Apply Category</button>
+                <button type="button" class="filter-btn" onclick="openCreateCategoryModal()"><i class="fas fa-plus"></i> Create Category</button>
             </form>
         </div>
 
@@ -791,8 +792,7 @@
                             <i class="fas fa-info-circle"></i> Details
                         </a>
 
-                        <a href="{{ url('/products/' . $product->id . '/edit') }}" class="edit-btn"
-                            onclick="event.preventDefault(); alert('Edit link would go to edit page');">
+                        <a href="{{ route('products.edit', $product->id) }}" class="edit-btn">
                             <i class="fas fa-edit"></i>
                         </a>
 
@@ -925,6 +925,38 @@
         </div>
     </div>
 
+    <div class="modal" id="createCategoryModal">
+        <div class="modal-content">
+            <button class="modal-close" type="button" onclick="closeCreateCategoryModal()">&times;</button>
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 style="color: var(--teal); font-family: 'Playfair Display'; font-size: 2.2rem;">
+                    <i class="fas fa-folder-plus" style="margin-right: 10px;"></i>Create Category
+                </h2>
+                <p style="color: var(--gray);">Add a new category for product organization</p>
+            </div>
+
+            <form id="createCategoryForm" action="{{ route('categories.store') }}" method="post">
+                @csrf
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">
+                        <i class="fas fa-tag" style="color: var(--teal); margin-right: 5px;"></i>Category Title *
+                    </label>
+                    <input type="text" name="title" id="categoryTitleInput" required maxlength="80"
+                        placeholder="e.g., Essential Oils" class="form-input">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <button type="button" onclick="closeCreateCategoryModal()" class="cancel-btn">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-plus-circle"></i> Save Category
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function toggleAiInput() {
             const aiInputArea = document.getElementById('aiInputArea');
@@ -990,6 +1022,17 @@
             addImageRow(true);
         }
 
+        function openCreateCategoryModal() {
+            document.getElementById('createCategoryModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCreateCategoryModal() {
+            document.getElementById('createCategoryModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            document.getElementById('createCategoryForm').reset();
+        }
+
         function addImageRow(reset = false) {
             const container = document.getElementById('image-upload-rows');
             if (reset) {
@@ -1039,8 +1082,12 @@
 
         window.onclick = function (event) {
             const createModal = document.getElementById('createProductModal');
+            const createCategoryModal = document.getElementById('createCategoryModal');
             if (event.target === createModal) {
                 closeCreateModal();
+            }
+            if (event.target === createCategoryModal) {
+                closeCreateCategoryModal();
             }
         };
 
@@ -1051,6 +1098,7 @@
             }
 
             initializeProductsAjax();
+            initializeCategoryForm();
         });
 
         document.getElementById('createProductForm').addEventListener('submit', async function (e) {
@@ -1115,6 +1163,31 @@
 
             categorySelect.addEventListener('change', function () {
                 fetchProducts();
+            });
+        }
+
+        function initializeCategoryForm() {
+            const form = document.getElementById('createCategoryForm');
+            const titleInput = document.getElementById('categoryTitleInput');
+
+            form.addEventListener('submit', function (event) {
+                const rawTitle = titleInput.value.trim();
+                const normalizedTitle = rawTitle.replace(/\s+/g, ' ');
+                const categoryRegex = /^[A-Za-z0-9][A-Za-z0-9\s&()\-,'".]{1,78}[A-Za-z0-9)]?$/;
+
+                if (!normalizedTitle) {
+                    event.preventDefault();
+                    showToast('Category title is required', 'error');
+                    return;
+                }
+
+                if (!categoryRegex.test(normalizedTitle)) {
+                    event.preventDefault();
+                    showToast('Category title contains invalid characters', 'error');
+                    return;
+                }
+
+                titleInput.value = normalizedTitle;
             });
         }
 
@@ -1201,6 +1274,7 @@
 
         function renderProductsGrid(products) {
             const productsGrid = document.getElementById('productsGrid');
+            syncDeletedProductsFromLocalStorage(products);
 
             if (!products.length) {
                 productsGrid.innerHTML = `
@@ -1241,6 +1315,53 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        function syncDeletedProductsFromLocalStorage(products) {
+            const storageKeys = ['cart', 'cartItems', 'productsCart', 'localCart'];
+            const productIds = new Set(products.map(function (product) {
+                return String(product.id);
+            }));
+            const removedIds = [];
+
+            storageKeys.forEach(function (key) {
+                const raw = localStorage.getItem(key);
+                if (!raw) {
+                    return;
+                }
+
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (!Array.isArray(parsed)) {
+                        return;
+                    }
+
+                    const filtered = parsed.filter(function (item) {
+                        const itemId = String(item?.id ?? item?.product_id ?? item?.productId ?? '');
+                        if (!itemId) {
+                            return true;
+                        }
+
+                        if (productIds.has(itemId)) {
+                            return true;
+                        }
+
+                        removedIds.push(itemId);
+                        return false;
+                    });
+
+                    if (filtered.length !== parsed.length) {
+                        localStorage.setItem(key, JSON.stringify(filtered));
+                    }
+                } catch (error) {
+                    return;
+                }
+            });
+
+            if (removedIds.length > 0) {
+                const uniqueRemovedIds = [...new Set(removedIds)];
+                renderProductsMessage('Removed deleted product(s) from your local storage: ' + uniqueRemovedIds.join(', '), 'success');
+            }
         }
 
         function renderProductsMessage(message, type) {

@@ -613,7 +613,7 @@
                     <div class="empty-icon"><i class="fas fa-cart-plus"></i></div>
                     <h3>Your draft order is empty</h3>
                     <p>Add products to local storage from the product details page, then open the draft order details page from here.</p>
-                    <a href="{{ route('products/*  */.index') }}"><i class="fas fa-arrow-right"></i> Browse Products</a>
+                    <a href="{{ route('products.index') }}"><i class="fas fa-arrow-right"></i> Browse Products</a>
                 </div>`;
                 return;
             }

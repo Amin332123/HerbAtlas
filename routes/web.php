@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Api\AiController;
 Route::get('/', function () {
@@ -54,9 +55,11 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('/products/{id}', [ProductController::class, 'show'])->name('product.show');
     Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::get('/products/{id}/update', [ProductController::class, 'edit'])->name('products.update.form');
     Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
