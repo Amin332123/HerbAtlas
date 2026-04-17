@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,29 +23,35 @@ class Product extends Model
         'category_id',
     ];
 
-    public function category()
+    protected $casts = [
+        'price' => 'decimal:2',
+        'stock' => 'integer',
+        'category_id' => 'integer',
+    ];
+
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function pictures()
+    public function pictures(): HasMany
     {
         return $this->hasMany(Picture::class);
     }
 
-    public function feedbacks()
+    public function feedbacks(): HasMany
     {
         return $this->hasMany(Feedback::class);
     }
 
-    public function orders()
+    public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class)
             ->withPivot('quantity', 'price')
             ->withTimestamps();
     }
 
-    public function reports()
+    public function reports(): HasMany
     {
         return $this->hasMany(Report::class);
     }

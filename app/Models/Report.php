@@ -10,8 +10,11 @@ class Report extends Model
     /** @use HasFactory<\Database\Factories\ReportFactory> */
     use HasFactory;
 
-
-
+    protected $fillable = [
+        'user_id',
+        'product_id',
+        'description',
+    ];
 
     public function user() {
         return $this->belongsTo(User::class);

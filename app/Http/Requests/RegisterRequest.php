@@ -22,16 +22,18 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'firstName' => 'required|string|max:255',
-            'lastName' => 'required|string|max:255',
+            'firstName' => 'required|string|alpha|min:2|max:255',
+            'lastName' => 'required|string|alpha|min:2|max:255',
             'email' => 'required|string|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed', // This looks for 'password_confirmation'
+            'password' => 'required|string|min:8|confirmed|regex:/^(?=.*[A-Z])(?=.*\d).+$/',
         ];
     }
+
     public function messages(): array
     {
         return [
-            'email.unique' => 'This email is already registered'
+            'email.unique' => 'This email is already registered.',
+            'password.regex' => 'Password must contain at least one uppercase letter and one number.',
         ];
     }
 }

@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Models;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -17,48 +19,48 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var list<string>
      */
-
     protected $fillable = [
         'firstName',
         'lastName',
         'email',
         'password',
-        'email_verified_at',
         'phone_number',
         'street',
         'city',
         'postal_code',
-        'region'
+        'region',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'is_banned' => 'boolean',
     ];
 
     public function role()
     {
-        return $this->hasOne(Role::class);
+        return $this->belongsTo(Role::class);
     }
-
 
     public function reports()
     {
         return $this->hasMany(Report::class);
-
     }
 
-
-    public function picture()
+    public function picture(): HasOne
     {
         return $this->hasOne(Picture::class);
     }
 
-    public function orders()
+    public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
-    public function feedbacks()
+    public function feedbacks(): HasMany
     {
         return $this->hasMany(Feedback::class);
     }
-
 
     /**
      * The attributes that should be hidden for serialization.
@@ -80,6 +82,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_banned' => 'boolean',
         ];
     }
 }

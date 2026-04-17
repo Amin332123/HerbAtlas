@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Herb Atlas</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --teal: #66bfbf;
@@ -13,6 +13,9 @@
             --coral: #f76b8a;
             --dark: #2d3748;
             --gray: #6b7280;
+            --soft-border: rgba(102, 191, 191, 0.16);
+            --shadow: 0 12px 32px rgba(102, 191, 191, 0.12);
+            --shadow-strong: 0 18px 42px rgba(102, 191, 191, 0.18);
         }
 
         * {
@@ -23,384 +26,606 @@
 
         body {
             font-family: 'Outfit', sans-serif;
-            background: var(--light-teal);
+            background:
+                radial-gradient(circle at top left, rgba(102, 191, 191, 0.16), transparent 30%),
+                radial-gradient(circle at top right, rgba(247, 107, 138, 0.10), transparent 24%),
+                var(--light-teal);
             color: var(--dark);
             min-height: 100vh;
         }
 
-        /* Header */
-        .header {
-            background: white;
-            padding: 20px 60px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(102, 191, 191, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, var(--teal), var(--coral));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Playfair Display', serif;
-            font-weight: 900;
-            font-size: 1.2rem;
-            color: white;
-        }
-
-        .logo-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--teal);
-        }
-
-        .nav-menu {
-            display: flex;
-            align-items: center;
-            gap: 35px;
-        }
-
-        .nav-link {
-            color: var(--gray);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: var(--teal);
-        }
-
-        .nav-link.active {
-            color: var(--teal);
-            font-weight: 600;
-        }
-
-        .logout-btn {
-            padding: 10px 24px;
-            background: linear-gradient(135deg, var(--coral), #ff7b9a);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(247, 107, 138, 0.3);
-        }
-
-        /* Main */
         .main-content {
-            max-width: 1400px;
+            max-width: 1440px;
             margin: 0 auto;
-            padding: 40px 60px;
+            padding: 34px 60px 56px;
         }
 
-        .welcome-section {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            margin-bottom: 35px;
-            box-shadow: 0 4px 20px rgba(102, 191, 191, 0.08);
+        .dashboard-hero {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(102, 191, 191, 0.98), rgba(102, 191, 191, 0.92) 40%, rgba(247, 107, 138, 0.96));
+            color: white;
+            border-radius: 32px;
+            padding: 34px 36px;
+            box-shadow: 0 18px 40px rgba(102, 191, 191, 0.22);
+            margin-bottom: 28px;
+            isolation: isolate;
         }
 
-        .welcome-title {
+        .dashboard-hero::before,
+        .dashboard-hero::after {
+            content: '';
+            position: absolute;
+            border-radius: 999px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .dashboard-hero::before {
+            width: 320px;
+            height: 320px;
+            background: rgba(255, 255, 255, 0.09);
+            right: -120px;
+            top: -130px;
+        }
+
+        .dashboard-hero::after {
+            width: 260px;
+            height: 260px;
+            background: rgba(255, 255, 255, 0.07);
+            left: -100px;
+            bottom: -120px;
+        }
+
+        .hero-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .hero-copy {
+            max-width: 760px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 0.86rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            margin-bottom: 16px;
+        }
+
+        .hero-title {
             font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            color: var(--teal);
-            margin-bottom: 10px;
+            font-size: clamp(2.2rem, 4vw, 3.9rem);
+            line-height: 1.02;
+            font-weight: 800;
+            margin-bottom: 14px;
+        }
+
+        .hero-subtitle {
+            max-width: 700px;
+            font-size: 1.02rem;
+            line-height: 1.75;
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        .hero-meta {
+            display: grid;
+            gap: 12px;
+            min-width: 280px;
+            flex: 1;
+            max-width: 360px;
+        }
+
+        .hero-meta-card {
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 22px;
+            padding: 18px 18px;
+            backdrop-filter: blur(8px);
+        }
+
+        .hero-meta-label {
+            font-size: 0.84rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            opacity: 0.88;
+            margin-bottom: 8px;
+        }
+
+        .hero-meta-value {
+            font-size: 1.45rem;
             font-weight: 800;
         }
 
-        .welcome-subtitle {
-            color: var(--gray);
-            font-size: 1.1rem;
+        .hero-meta-note {
+            margin-top: 6px;
+            font-size: 0.92rem;
+            opacity: 0.92;
+            line-height: 1.5;
         }
 
-        .section-header {
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 26px;
+        }
+
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 24px;
+            padding: 22px 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-strong);
+        }
+
+        .kpi-label {
+            color: var(--gray);
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            line-height: 1;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+
+        .kpi-caption {
+            color: var(--gray);
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .kpi-card.accent-teal .kpi-value { color: var(--teal); }
+        .kpi-card.accent-coral .kpi-value { color: var(--coral); }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 22px;
+            margin-bottom: 28px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid var(--soft-border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .panel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            gap: 16px;
+            padding: 26px 28px 18px;
+            border-bottom: 1px solid rgba(102, 191, 191, 0.10);
         }
 
-        .section-title {
-            font-size: 1.8rem;
+        .panel-title-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .panel-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem;
+            color: var(--dark);
+            font-weight: 800;
+        }
+
+        .panel-subtitle {
+            color: var(--gray);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .panel-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--light-teal);
+            color: var(--teal);
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-size: 0.9rem;
             font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .analytics-cards {
+            padding: 24px 28px 28px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .analytics-card {
+            background: linear-gradient(180deg, #ffffff 0%, #fbffff 100%);
+            border: 1px solid rgba(102, 191, 191, 0.14);
+            border-radius: 22px;
+            padding: 20px;
+            min-height: 132px;
+        }
+
+        .analytics-card h4 {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+        }
+
+        .analytics-stat {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--dark);
+            line-height: 1;
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+
+        .analytics-desc {
+            color: var(--gray);
+            font-size: 0.94rem;
+            line-height: 1.55;
+        }
+
+        .analytics-card.highlight {
+            background: linear-gradient(135deg, rgba(102, 191, 191, 0.10), rgba(247, 107, 138, 0.08));
+        }
+
+        .mini-insights {
+            display: grid;
+            gap: 14px;
+            padding: 24px 28px 28px;
+        }
+
+        .insight-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            background: #fbffff;
+            border: 1px solid rgba(102, 191, 191, 0.13);
+            border-radius: 20px;
+            padding: 18px 18px;
+        }
+
+        .insight-copy {
+            min-width: 0;
+        }
+
+        .insight-label {
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .insight-text {
+            color: var(--gray);
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .insight-value {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--teal);
+            white-space: nowrap;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 22px;
+        }
+
+        .list-panel {
+            padding: 22px 26px 26px;
+        }
+
+        .list-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .list-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.55rem;
+            font-weight: 800;
             color: var(--dark);
         }
 
-        .view-all-link {
+        .list-link {
             color: var(--teal);
+            font-weight: 700;
             text-decoration: none;
-            font-weight: 600;
         }
 
-        /* Products */
-        .products-section {
-            margin-bottom: 40px;
+        .list-link:hover {
+            text-decoration: underline;
         }
 
-        .products-grid {
+        .product-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
         }
 
         .product-card {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(102, 191, 191, 0.08);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(102, 191, 191, 0.15);
+            background: #ffffff;
+            border: 1px solid rgba(102, 191, 191, 0.14);
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 8px 22px rgba(102, 191, 191, 0.08);
         }
 
         .product-image {
             width: 100%;
-            height: 180px;
+            height: 165px;
             object-fit: cover;
-            border-radius: 12px;
-            margin-bottom: 15px;
+            background: linear-gradient(135deg, rgba(102, 191, 191, 0.12), rgba(247, 107, 138, 0.08));
+        }
+
+        .product-body {
+            padding: 16px;
         }
 
         .product-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--coral), #ff7b9a);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: var(--light-teal);
+            color: var(--teal);
+            font-size: 0.78rem;
+            font-weight: 800;
             margin-bottom: 10px;
         }
 
         .product-name {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--teal);
+            font-size: 1.08rem;
+            line-height: 1.35;
+            font-weight: 800;
+            color: var(--dark);
             margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        .product-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
         }
 
         .product-price {
-            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--coral);
+            font-size: 1.05rem;
+        }
+
+        .product-description {
+            color: var(--gray);
+            font-size: 0.9rem;
+            line-height: 1.55;
+            margin-top: 10px;
+        }
+
+        .orders-list {
+            display: grid;
+            gap: 14px;
+            padding: 0 26px 26px;
+        }
+
+        .order-card {
+            background: #ffffff;
+            border: 1px solid rgba(102, 191, 191, 0.14);
+            border-radius: 22px;
+            padding: 18px 18px;
+            box-shadow: 0 8px 18px rgba(102, 191, 191, 0.07);
+        }
+
+        .order-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .order-id {
+            font-weight: 800;
+            font-size: 1.04rem;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .order-customer {
+            color: var(--gray);
+            font-size: 0.92rem;
+            line-height: 1.45;
+        }
+
+        .order-chip {
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            background: var(--light-teal);
+            color: var(--teal);
+            white-space: nowrap;
+        }
+
+        .order-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .order-total {
             font-weight: 800;
             color: var(--coral);
         }
 
-        /* Orders */
-        .orders-grid {
-            display: grid;
-            gap: 20px;
+        .empty-state {
+            padding: 24px;
+            border: 1px dashed rgba(102, 191, 191, 0.28);
+            border-radius: 22px;
+            text-align: center;
+            color: var(--gray);
+            background: #fbffff;
         }
 
-        .order-card {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(102, 191, 191, 0.08);
-            display: grid;
-            grid-template-columns: auto 1fr auto auto;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .order-id {
-            font-weight: 700;
+        .empty-state strong {
+            display: block;
             color: var(--dark);
-            font-size: 1.1rem;
+            margin-bottom: 8px;
+            font-size: 1rem;
         }
 
-        .order-info {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
+        .top-products {
+            padding: 0 28px 28px;
         }
 
-        .order-products {
-            color: var(--gray);
-        }
-
-        .order-date {
-            color: var(--gray);
-            font-size: 0.85rem;
-        }
-
-        .order-status {
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .status-delivered {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-shipping {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .status-processing {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .show-details-btn {
-            padding: 10px 20px;
-            background: var(--teal);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .show-details-btn:hover {
-            background: #5ab0b0;
-        }
-
-        /* Footer */
-        .footer {
-            background: linear-gradient(135deg, var(--dark) 0%, #1a202c 100%);
-            color: white;
-            padding: 60px 60px 30px;
-            margin-top: 60px;
-        }
-
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 50px;
-            margin-bottom: 40px;
-        }
-
-        .footer-logo {
+        .top-product-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(102, 191, 191, 0.10);
         }
 
-        .footer-logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--teal), var(--coral));
-            border-radius: 8px;
-            display: flex;
+        .top-product-row:last-child {
+            border-bottom: none;
+        }
+
+        .top-product-rank {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Playfair Display', serif;
-            font-weight: 900;
-            font-size: 1.1rem;
-        }
-
-        .footer-logo-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
+            background: linear-gradient(135deg, rgba(102, 191, 191, 0.14), rgba(247, 107, 138, 0.12));
+            color: var(--dark);
             font-weight: 800;
+            flex-shrink: 0;
         }
 
-        .footer-description {
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.6;
-            font-size: 0.9rem;
+        .top-product-name {
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 4px;
         }
 
-        .footer-column h3 {
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            font-weight: 700;
+        .top-product-meta {
+            color: var(--gray);
+            font-size: 0.92rem;
         }
 
-        .footer-links {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .top-product-value {
+            margin-left: auto;
+            text-align: right;
+            font-weight: 800;
+            color: var(--coral);
         }
 
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .footer-links a:hover {
-            color: var(--teal);
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 25px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.85rem;
-        }
-
-        @media (max-width: 1024px) {
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr);
+        @media (max-width: 1200px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
-            .footer-content {
-                grid-template-columns: 1fr 1fr;
+
+            .analytics-grid,
+            .section-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
 
         @media (max-width: 768px) {
-            .nav-menu {
-                gap: 20px;
-            }
-            .products-grid {
-                grid-template-columns: 1fr;
-            }
-            .order-card {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .header {
-                padding: 15px 20px;
-                flex-direction: column;
-                gap: 15px;
-            }
             .main-content {
-                padding: 20px;
+                padding: 22px 18px 34px;
             }
-            .footer {
-                padding: 40px 20px 20px;
+
+            .dashboard-hero {
+                padding: 24px 20px;
+                border-radius: 26px;
             }
-            .footer-content {
+
+            .panel-header,
+            .analytics-cards,
+            .mini-insights,
+            .list-panel,
+            .orders-list,
+            .top-products {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .kpi-grid,
+            .analytics-cards,
+            .product-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .hero-top {
+                flex-direction: column;
+            }
+
+            .hero-meta {
+                max-width: none;
+                width: 100%;
+            }
+
+            .order-top {
+                flex-direction: column;
+            }
+
+            .top-product-value {
+                margin-left: 0;
+                text-align: left;
             }
         }
     </style>
@@ -409,113 +634,266 @@
     <x-header />
 
     <main class="main-content">
-        <section class="welcome-section">
-            <h1 class="welcome-title">Welcome back, Sarah!</h1>
-            <p class="welcome-subtitle">Here's what's happening with your account today.</p>
-        </section>
+        <section class="dashboard-hero">
+            <div class="hero-top">
+                <div class="hero-copy">
+                    <div class="eyebrow">
+                        <span>•</span>
+                        <span>Herb Atlas Admin Dashboard</span>
+                    </div>
+                    <h1 class="hero-title">Premium ecommerce control center</h1>
+                    <p class="hero-subtitle">
+                        Track store health at a glance with live user, product, inventory, and order performance.
+                        Everything here is powered by your backend stats and recent collections.
+                    </p>
+                </div>
 
-        <section class="products-section">
-            <div class="section-header">
-                <h2 class="section-title">Newest Products</h2>
-                <a href="products.html" class="view-all-link">View All →</a>
-            </div>
-            <div class="products-grid">
-                <div class="product-card">
-                    <img src="https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=800&h=400&fit=crop&q=80" alt="Argan Oil" class="product-image">
-                    <span class="product-badge">NEW</span>
-                    <h3 class="product-name">Argan Oil</h3>
-                    <div class="product-price">$29.99</div>
-                </div>
-                <div class="product-card">
-                    <img src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&h=400&fit=crop&q=80" alt="Lavender Essence" class="product-image">
-                    <span class="product-badge">NEW</span>
-                    <h3 class="product-name">Lavender Essence</h3>
-                    <div class="product-price">$24.99</div>
-                </div>
-                <div class="product-card">
-                    <img src="data:image/jpeg;base64,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" alt="Tea Tree Oil" class="product-image">
-                    <span class="product-badge">NEW</span>
-                    <h3 class="product-name">Tea Tree Oil</h3>
-                    <div class="product-price">$19.99</div>
+                <div class="hero-meta">
+                    <div class="hero-meta-card">
+                        <div class="hero-meta-label">Estimated revenue</div>
+                        <div class="hero-meta-value">{{ $estimatedRevenue ?? 0 }}</div>
+                        <div class="hero-meta-note">Generated from order items using stored pivot prices.</div>
+                    </div>
+                    <div class="hero-meta-card">
+                        <div class="hero-meta-label">Operational note</div>
+                        <div class="hero-meta-value">{{ $totalOrders ?? 0 }} orders</div>
+                        <div class="hero-meta-note">{{ $totalItemsSold ?? 0 }} items moved through the store.</div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="orders-section">
-            <div class="section-header">
-                <h2 class="section-title">Latest Orders</h2>
-                <a href="my-orders.html" class="view-all-link">View All →</a>
+        <section class="kpi-grid">
+            <div class="kpi-card accent-teal">
+                <div class="kpi-label">Total users</div>
+                <div class="kpi-value">{{ $totalUsers ?? 0 }}</div>
+                <div class="kpi-caption">Registered customers and admin accounts combined.</div>
             </div>
-            <div class="orders-grid">
-                <div class="order-card">
-                    <div class="order-id">#ORD-2024-001</div>
-                    <div class="order-info">
-                        <div class="order-products">3 products ordered</div>
-                        <div class="order-date">Placed on Feb 14, 2026</div>
+            <div class="kpi-card">
+                <div class="kpi-label">Active users</div>
+                <div class="kpi-value">{{ $activeUsers ?? 0 }}</div>
+                <div class="kpi-caption">Users currently available for normal access.</div>
+            </div>
+            <div class="kpi-card accent-coral">
+                <div class="kpi-label">Banned users</div>
+                <div class="kpi-value">{{ $bannedUsers ?? 0 }}</div>
+                <div class="kpi-caption">Accounts flagged by moderation controls.</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Total products</div>
+                <div class="kpi-value">{{ $totalProducts ?? 0 }}</div>
+                <div class="kpi-caption">Catalog size across all available categories.</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Low stock</div>
+                <div class="kpi-value">{{ $lowStockProducts ?? 0 }}</div>
+                <div class="kpi-caption">Products at or below the replenishment threshold.</div>
+            </div>
+        </section>
+
+        <section class="analytics-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title-wrap">
+                        <h2 class="panel-title">Store analytics overview</h2>
+                        <p class="panel-subtitle">Secondary performance snapshot for inventory and sales rhythm.</p>
                     </div>
-                    <span class="order-status status-delivered">Delivered</span>
-                    <button class="show-details-btn">Show Details</button>
+                    <div class="panel-badge">Live backend data</div>
                 </div>
-                <div class="order-card">
-                    <div class="order-id">#ORD-2024-002</div>
-                    <div class="order-info">
-                        <div class="order-products">2 products ordered</div>
-                        <div class="order-date">Placed on Feb 15, 2026</div>
+
+                <div class="analytics-cards">
+                    <div class="analytics-card">
+                        <h4>Total categories</h4>
+                        <div class="analytics-stat">{{ $totalCategories ?? 0 }}</div>
+                        <div class="analytics-desc">Category structure supporting product discovery.</div>
                     </div>
-                    <span class="order-status status-shipping">Shipping</span>
-                    <button class="show-details-btn">Show Details</button>
+                    <div class="analytics-card highlight">
+                        <h4>Total orders</h4>
+                        <div class="analytics-stat">{{ $totalOrders ?? 0 }}</div>
+                        <div class="analytics-desc">All time order count captured by the store.</div>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Total items sold</h4>
+                        <div class="analytics-stat">{{ $totalItemsSold ?? 0 }}</div>
+                        <div class="analytics-desc">Summed quantity from every order item.</div>
+                    </div>
+                    <div class="analytics-card highlight">
+                        <h4>Total stock units</h4>
+                        <div class="analytics-stat">{{ $totalStockUnits ?? 0 }}</div>
+                        <div class="analytics-desc">Available units currently across your catalog.</div>
+                    </div>
                 </div>
-                <div class="order-card">
-                    <div class="order-id">#ORD-2024-003</div>
-                    <div class="order-info">
-                        <div class="order-products">1 product ordered</div>
-                        <div class="order-date">Placed on Feb 16, 2026</div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title-wrap">
+                        <h2 class="panel-title">Inventory pulse</h2>
+                        <p class="panel-subtitle">Quick operational signals to protect stock health.</p>
                     </div>
-                    <span class="order-status status-processing">Processing</span>
-                    <button class="show-details-btn">Show Details</button>
+                    <div class="panel-badge">Threshold: 5 units</div>
+                </div>
+
+                <div class="mini-insights">
+                    <div class="insight-row">
+                        <div class="insight-copy">
+                            <div class="insight-label">Low-stock watchlist</div>
+                            <div class="insight-text">Products requiring attention before they sell out.</div>
+                        </div>
+                        <div class="insight-value">{{ $lowStockProducts ?? 0 }}</div>
+                    </div>
+                    <div class="insight-row">
+                        <div class="insight-copy">
+                            <div class="insight-label">Stock coverage</div>
+                            <div class="insight-text">Total inventory units backing current demand.</div>
+                        </div>
+                        <div class="insight-value">{{ $totalStockUnits ?? 0 }}</div>
+                    </div>
+                    <div class="insight-row">
+                        <div class="insight-copy">
+                            <div class="insight-label">Catalog breadth</div>
+                            <div class="insight-text">Number of active categories in the storefront.</div>
+                        </div>
+                        <div class="insight-value">{{ $totalCategories ?? 0 }}</div>
+                    </div>
                 </div>
             </div>
         </section>
+
+        <section class="section section-grid">
+            <div class="panel list-panel">
+                <div class="list-head">
+                    <div>
+                        <h2 class="list-title">Newest products</h2>
+                        <p class="panel-subtitle">Recently added catalog items for merchandising focus.</p>
+                    </div>
+                </div>
+
+                @if(!empty($newestProducts) && count($newestProducts))
+                    <div class="product-grid">
+                        @foreach($newestProducts as $product)
+                            <article class="product-card">
+                                @if(!empty($product->image))
+                                    <img src="{{ $product->image }}" alt="{{ $product->name }}" class="product-image">
+                                @else
+                                    <div class="product-image"></div>
+                                @endif
+                                <div class="product-body">
+                                    <div class="product-badge">New arrival</div>
+                                    <div class="product-name">{{ $product->name }}</div>
+                                    <div class="product-meta">
+                                        @if(isset($product->stock))
+                                            <span>Stock: {{ $product->stock }}</span>
+                                        @endif
+                                        @if(isset($product->category_name) && $product->category_name)
+                                            <span>Category: {{ $product->category_name }}</span>
+                                        @endif
+                                    </div>
+                                    @if(isset($product->price))
+                                        <div class="product-price">{{ $product->price }}</div>
+                                    @endif
+                                    @if(!empty($product->description_excerpt))
+                                        <div class="product-description">{{ $product->description_excerpt }}</div>
+                                    @endif
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="empty-state">
+                        <strong>No recent products yet</strong>
+                        <span>Once products are added, they will appear here automatically.</span>
+                    </div>
+                @endif
+            </div>
+
+            <div class="panel list-panel">
+                <div class="list-head">
+                    <div>
+                        <h2 class="list-title">Latest orders</h2>
+                        <p class="panel-subtitle">Most recent purchases captured from the checkout flow.</p>
+                    </div>
+                </div>
+
+                <div class="orders-list">
+                    @if(!empty($latestOrders) && count($latestOrders))
+                        @foreach($latestOrders as $order)
+                            <article class="order-card">
+                                <div class="order-top">
+                                    <div>
+                                        <div class="order-id">Order #{{ $order->id }}</div>
+                                        <div class="order-customer">
+                                            @if(!empty($order->name))
+                                                {{ $order->name }}
+                                            @else
+                                                Customer ID {{ $order->user_id ?? '—' }}
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="order-chip">{{ $order->created_at ? $order->created_at->format('M d, Y') : 'Recent' }}</div>
+                                </div>
+                                <div class="order-details">
+                                    @if(isset($order->items_count))
+                                        <span>{{ $order->items_count }} item(s)</span>
+                                    @endif
+                                    @if(isset($order->total_quantity))
+                                        <span>{{ $order->total_quantity }} units</span>
+                                    @endif
+                                    @if(isset($order->total_amount))
+                                        <span class="order-total">{{ $order->total_amount }}</span>
+                                    @endif
+                                </div>
+                            </article>
+                        @endforeach
+                    @else
+                        <div class="empty-state">
+                            <strong>No latest orders yet</strong>
+                            <span>Orders will appear here after customers start checking out.</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </section>
+
+        @if(!empty($topSellingProducts) && count($topSellingProducts))
+            <section class="panel">
+                <div class="panel-header">
+                    <div class="panel-title-wrap">
+                        <h2 class="panel-title">Top selling products</h2>
+                        <p class="panel-subtitle">Best performers ranked by total quantity sold.</p>
+                    </div>
+                    <div class="panel-badge">Sales ranking</div>
+                </div>
+
+                <div class="top-products">
+                    @foreach($topSellingProducts as $index => $product)
+                        <div class="top-product-row">
+                            <div class="top-product-rank">{{ $index + 1 }}</div>
+                            <div class="top-product-copy">
+                                <div class="top-product-name">{{ $product->name ?? 'Unnamed product' }}</div>
+                                <div class="top-product-meta">
+                                    @if(isset($product->total_sold))
+                                        Sold: {{ $product->total_sold }}
+                                    @endif
+                                    @if(isset($product->stock))
+                                        @if(isset($product->total_sold)) · @endif Stock: {{ $product->stock }}
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="top-product-value">
+                                @if(isset($product->revenue))
+                                    {{ $product->revenue }}
+                                @elseif(isset($product->total_sold))
+                                    {{ $product->total_sold }}
+                                @else
+                                    —
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
     </main>
-
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-brand">
-                <div class="footer-logo">
-                    <div class="footer-logo-icon">HA</div>
-                    <div class="footer-logo-text">Herb Atlas</div>
-                </div>
-                <p class="footer-description">Your trusted source for premium natural herbs and botanical essences.</p>
-            </div>
-            <div class="footer-column">
-                <h3>Shop</h3>
-                <div class="footer-links">
-                    <a href="#">All Products</a>
-                    <a href="#">Essential Oils</a>
-                    <a href="#">New Arrivals</a>
-                </div>
-            </div>
-            <div class="footer-column">
-                <h3>Company</h3>
-                <div class="footer-links">
-                    <a href="#">About Us</a>
-                    <a href="#">Our Story</a>
-                    <a href="#">Blog</a>
-                </div>
-            </div>
-            <div class="footer-column">
-                <h3>Support</h3>
-                <div class="footer-links">
-                    <a href="#">Contact Us</a>
-                    <a href="#">FAQ</a>
-                    <a href="#">Shipping Info</a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 Herb Atlas. All rights reserved.</p>
-        </div>
-    </footer>
-
 </body>
 </html>

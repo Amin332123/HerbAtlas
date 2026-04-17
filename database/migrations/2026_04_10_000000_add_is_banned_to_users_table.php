@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->nullable();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('status')->default('pending');
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->boolean('is_banned')->default(false)->after('postal');
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('is_banned');
+        });
     }
 };

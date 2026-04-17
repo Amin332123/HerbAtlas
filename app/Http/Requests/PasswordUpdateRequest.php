@@ -27,14 +27,17 @@ class PasswordUpdateRequest extends FormRequest
                 'required',
                 'min:8',
                 'confirmed',
-                'regex:/^(?=.*[A-Z])[A-Za-z\d]{8,}$/'
+                'different:old_password',
+                'regex:/^(?=.*[A-Z])(?=.*\d).+$/'
             ],
         ];
     }
+
     public function messages(): array
     {
         return [
-            'password.regex' => 'Your password must contain at least one uppercase letter and one number.',
+            'new_password.regex' => 'Your password must contain at least one uppercase letter and one number.',
+            'new_password.different' => 'New password must be different from your current password.',
         ];
     }
 }
