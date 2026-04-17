@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Details - Herb Atlas</title>
+    <title>{{ $order->display_name ?? ('Order #' . $order->id) }} - Herb Atlas</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -11,19 +11,13 @@
             --teal: #66bfbf;
             --teal-dark: #4aa8a8;
             --light-teal: #eaf6f6;
-            --light-teal-2: #f4fbfb;
+            --light-teal-2: #f5fbfb;
+            --white: #fcfefe;
             --coral: #f76b8a;
-            --coral-dark: #ef476f;
             --dark: #2d3748;
-            --dark-soft: #3f4d63;
             --gray: #6b7280;
-            --gray-soft: #94a3b8;
             --border: rgba(102, 191, 191, 0.15);
-            --shadow: 0 10px 35px rgba(102, 191, 191, 0.12);
-            --shadow-soft: 0 4px 18px rgba(45, 55, 72, 0.08);
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #e53e3e;
+            --shadow: 0 14px 40px rgba(102, 191, 191, 0.12);
         }
 
         * {
@@ -35,723 +29,331 @@
         body {
             font-family: 'Outfit', sans-serif;
             background:
-                radial-gradient(circle at top left, rgba(102, 191, 191, 0.08), transparent 26%),
-                radial-gradient(circle at bottom right, rgba(247, 107, 138, 0.08), transparent 22%),
+                radial-gradient(circle at top left, rgba(102, 191, 191, 0.08), transparent 22%),
+                radial-gradient(circle at bottom right, rgba(247, 107, 138, 0.08), transparent 20%),
                 var(--light-teal);
             color: var(--dark);
+            line-height: 1.6;
             min-height: 100vh;
         }
 
-        .header {
-            background: rgba(255, 255, 255, 0.92);
-            padding: 18px 60px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 18px rgba(102, 191, 191, 0.12);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(14px);
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-        }
-
-        .logo-icon {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, var(--teal), var(--coral));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Playfair Display', serif;
-            font-weight: 900;
-            font-size: 1.1rem;
-            color: white;
-            box-shadow: 0 8px 22px rgba(102, 191, 191, 0.28);
-        }
-
-        .logo-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.45rem;
-            font-weight: 800;
-            color: var(--teal);
-        }
-
         .page {
-            max-width: 1120px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 48px 32px 84px;
+            padding: 32px 24px 72px;
         }
 
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--gray);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.92rem;
-            margin-bottom: 28px;
-            transition: color 0.25s ease;
-        }
-
-        .back-link i {
-            transition: transform 0.25s ease;
-        }
-
-        .back-link:hover {
-            color: var(--teal);
-        }
-
-        .back-link:hover i {
-            transform: translateX(-4px);
-        }
-
-        .content-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.9fr);
-            gap: 28px;
-            align-items: start;
-        }
-
-        .main-column,
-        .side-column {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .order-hero {
-            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-soft) 100%);
-            border-radius: 30px;
-            padding: 34px 36px;
-            color: white;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 18px 45px rgba(45, 55, 72, 0.18);
-        }
-
-        .order-hero::before,
-        .order-hero::after {
-            content: '';
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        .order-hero::before {
-            width: 320px;
-            height: 320px;
-            right: -90px;
-            top: -80px;
-            background: radial-gradient(circle, rgba(102, 191, 191, 0.18), transparent 68%);
-        }
-
-        .order-hero::after {
-            width: 240px;
-            height: 240px;
-            right: 60px;
-            bottom: -90px;
-            background: radial-gradient(circle, rgba(247, 107, 138, 0.16), transparent 70%);
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-top {
+        .page-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            gap: 18px;
-            margin-bottom: 26px;
+            align-items: flex-end;
+            gap: 20px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
         }
 
-        .hero-label {
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.56);
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            color: var(--dark);
             margin-bottom: 8px;
         }
 
-        .hero-order-id {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
-            font-weight: 900;
-            line-height: 1.1;
+        .page-subtitle {
+            color: var(--gray);
+            max-width: 720px;
         }
 
-        .hero-subline {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-            margin-top: 10px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
+        .status-badge {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 14px 18px;
+            box-shadow: 0 6px 18px rgba(102, 191, 191, 0.08);
+            min-width: 240px;
+            text-align: right;
         }
 
-        .hero-subline span {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-        }
-
-        .hero-status {
-            padding: 10px 18px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+        .status-badge small {
+            display: block;
+            color: var(--gray);
             font-size: 0.78rem;
-            font-weight: 700;
-            letter-spacing: 0.7px;
             text-transform: uppercase;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
+            letter-spacing: 0.08em;
+            margin-bottom: 4px;
         }
 
-        .hero-status i {
-            font-size: 0.8rem;
+        .status-badge strong {
+            font-size: 1.02rem;
+            color: var(--dark);
         }
 
-        .hero-status.status-draft .status-dot {
-            background: var(--warning);
-        }
-
-        .hero-status.status-confirmed .status-dot {
-            background: var(--success);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse 1.6s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.5;
-                transform: scale(0.72);
-            }
-        }
-
-        .hero-stats {
+        .order-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 20px;
-            overflow: hidden;
-        }
-
-        .hero-stat {
-            padding: 18px 16px;
-            text-align: center;
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .hero-stat:last-child {
-            border-right: none;
-        }
-
-        .hero-stat-label {
-            display: block;
-            font-size: 0.68rem;
-            letter-spacing: 1.4px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 6px;
-        }
-
-        .hero-stat-value {
-            display: block;
-            font-size: 1.32rem;
-            font-weight: 800;
-            color: white;
-        }
-
-        .hero-stat-value.highlight {
-            color: #86efac;
-        }
-
-        .hero-stat-value.coral {
-            color: #fda4af;
-        }
-
-        .hero-stat-value.warning {
-            color: #fde68a;
-        }
-
-        .hero-status.status-processing .status-dot {
-            background: var(--warning);
-        }
-
-        .hero-status.status-completed .status-dot {
-            background: var(--success);
-        }
-
-        .hero-status.status-cancelled .status-dot {
-            background: var(--danger);
-        }
-
-        .hero-status.status-default .status-dot {
-            background: #cbd5e1;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 24px;
+            align-items: start;
         }
 
         .card {
             background: rgba(255, 255, 255, 0.96);
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 28px;
             box-shadow: var(--shadow);
-            overflow: hidden;
         }
 
-        .section-card {
-            padding: 26px;
-        }
-
-        .section-heading {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 18px;
-        }
-
-        .section-title {
-            font-size: 0.76rem;
-            font-weight: 700;
-            letter-spacing: 1.6px;
-            text-transform: uppercase;
-            color: var(--gray);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-title i {
-            color: var(--teal);
-        }
-
-        .section-subtitle {
-            color: var(--gray);
-            font-size: 0.92rem;
-        }
-
-        .products-list {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .product-row {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            padding: 18px;
-            display: grid;
-            grid-template-columns: 84px minmax(0, 1fr) auto;
-            gap: 16px;
-            align-items: center;
-            box-shadow: var(--shadow-soft);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }
-
-        .product-row:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 26px rgba(102, 191, 191, 0.14);
-        }
-
-        .product-thumb-wrap {
-            width: 84px;
-            height: 84px;
-            border-radius: 20px;
-            overflow: hidden;
-            background: linear-gradient(135deg, var(--light-teal), #ffffff);
-            border: 1px solid rgba(102, 191, 191, 0.18);
-        }
-
-        .product-thumb-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .product-info {
-            min-width: 0;
-        }
-
-        .product-name {
-            font-size: 1.02rem;
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: 6px;
-        }
-
-        .product-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .product-category-tag,
-        .product-meta-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--light-teal-2);
-            color: var(--teal-dark);
-            border: 1px solid rgba(102, 191, 191, 0.14);
-            padding: 5px 11px;
-            border-radius: 999px;
-            font-size: 0.74rem;
-            font-weight: 600;
-        }
-
-        .product-pricing {
-            text-align: right;
-            min-width: 140px;
-        }
-
-        .price-unit {
-            color: var(--gray);
-            font-size: 0.8rem;
-            margin-bottom: 7px;
-        }
-
-        .price-unit strong {
-            color: var(--dark);
-        }
-
-        .price-qty {
-            margin-bottom: 8px;
-        }
-
-        .qty-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 52px;
-            background: var(--light-teal);
-            color: var(--teal-dark);
-            border-radius: 999px;
-            padding: 5px 12px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-
-        .price-subtotal {
-            display: block;
-            font-size: 1.08rem;
-            font-weight: 800;
-            color: var(--coral);
-            margin-bottom: 12px;
-        }
-
-        .btn-primary,
-        .btn-clear,
-        .btn-remove-item,
-        .btn-secondary-link {
-            border: none;
-            outline: none;
-            cursor: pointer;
-            font-family: 'Outfit', sans-serif;
-            text-decoration: none;
-            transition: all 0.25s ease;
-        }
-
-        .btn-primary {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 15px 20px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, var(--teal), var(--teal-dark));
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 700;
-            box-shadow: 0 10px 24px rgba(102, 191, 191, 0.28);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 32px rgba(102, 191, 191, 0.36);
-        }
-
-        .btn-clear {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            padding: 14px 18px;
-            border-radius: 16px;
-            background: #fff5f5;
-            color: var(--danger);
-            border: 1px solid #fed7d7;
-            font-size: 0.9rem;
-            font-weight: 700;
-        }
-
-        .btn-clear:hover {
-            background: #fff0f0;
-            border-color: #fc8181;
-        }
-
-        .btn-remove-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: transparent;
-            color: var(--danger);
-            border: 1px solid rgba(229, 62, 62, 0.18);
-            border-radius: 12px;
-            padding: 8px 11px;
-            font-size: 0.78rem;
-            font-weight: 700;
-        }
-
-        .btn-remove-item:hover {
-            background: #fff5f5;
-            border-color: rgba(229, 62, 62, 0.32);
-        }
-
-        .btn-secondary-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--teal-dark);
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .btn-secondary-link:hover {
-            color: var(--teal);
+        .order-card {
+            padding: 24px;
         }
 
         .summary-card {
-            padding: 28px;
             position: sticky;
-            top: 110px;
+            top: 92px;
+            padding: 24px;
         }
 
-        .status-panel {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
-            margin-bottom: 18px;
-        }
-
-        .status-pill {
-            border-radius: 18px;
-            padding: 14px 16px;
-            background: linear-gradient(135deg, rgba(102, 191, 191, 0.08), rgba(247, 107, 138, 0.08));
-            border: 1px solid rgba(102, 191, 191, 0.14);
-        }
-
-        .status-pill .label {
-            display: block;
-            font-size: 0.72rem;
-            letter-spacing: 1.2px;
+        .section-title {
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
             color: var(--gray);
-            margin-bottom: 6px;
-            font-weight: 700;
-        }
-
-        .status-pill .value {
-            font-size: 0.95rem;
-            font-weight: 800;
-            color: var(--dark);
-        }
-
-        .summary-card::before {
-            content: '';
-            position: absolute;
-            top: 22px;
-            bottom: 22px;
-            right: 0;
-            width: 5px;
-            border-radius: 999px 0 0 999px;
-            background: linear-gradient(to bottom, var(--teal), var(--coral));
-        }
-
-        .summary-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.28rem;
-            font-weight: 800;
-            color: var(--dark);
+            margin-bottom: 18px;
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 20px;
         }
 
-        .summary-title i {
-            color: var(--teal);
+        .order-meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .meta-box {
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #fff, var(--light-teal-2));
+            border: 1px solid var(--border);
+        }
+
+        .meta-box small {
+            display: block;
+            color: var(--gray);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 4px;
+        }
+
+        .meta-box strong {
+            color: var(--dark);
             font-size: 1rem;
         }
 
-        .summary-rows {
+        .items {
             display: flex;
             flex-direction: column;
+            gap: 16px;
+        }
+
+        .item {
+            display: grid;
+            grid-template-columns: 96px minmax(0, 1fr);
+            gap: 16px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            background: linear-gradient(180deg, #ffffff, var(--light-teal-2));
+        }
+
+        .item img {
+            width: 96px;
+            height: 96px;
+            border-radius: 18px;
+            object-fit: cover;
+            background: #edfafa;
+        }
+
+        .item-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .item-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .item-name {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .item-category {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .item-price {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .item-price strong {
+            color: var(--coral);
+            font-size: 1rem;
+        }
+
+        .item-price span {
+            display: block;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .quantity-form {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: #fff;
+        }
+
+        .quantity-form input {
+            width: 76px;
+            height: 42px;
+            border: none;
+            text-align: center;
+            font-weight: 700;
+            border-radius: 10px;
+            background: var(--light-teal-2);
+        }
+
+        .quantity-form input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 191, 191, 0.15);
+        }
+
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-update {
+            background: var(--teal);
+            color: white;
+        }
+
+        .btn-remove {
+            background: rgba(247, 107, 138, 0.1);
+            color: var(--coral);
         }
 
         .summary-row {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            gap: 14px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.92rem;
-        }
-
-        .summary-row:last-child {
-            border-bottom: none;
-        }
-
-        .summary-row .label {
+            gap: 12px;
+            margin-bottom: 12px;
             color: var(--gray);
         }
 
-        .summary-row .value {
+        .summary-row strong {
             color: var(--dark);
-            font-weight: 700;
-            text-align: right;
         }
 
-        .summary-row .value.success {
-            color: var(--success);
-        }
-
-        .summary-total-row {
+        .summary-total {
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
-            gap: 16px;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 2px dashed rgba(102, 191, 191, 0.24);
+            align-items: baseline;
+            gap: 12px;
+            margin-top: 8px;
         }
 
-        .total-label {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.08rem;
+        .summary-total span {
+            font-size: 1.8rem;
             font-weight: 800;
-            color: var(--dark);
-        }
-
-        .total-value {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.7rem;
-            font-weight: 900;
             color: var(--coral);
-            line-height: 1;
         }
 
-        .currency {
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.98rem;
-            font-weight: 600;
+        .empty-state {
+            padding: 64px 24px;
+            text-align: center;
+            border: 1.5px dashed rgba(102, 191, 191, 0.32);
+            border-radius: 26px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .empty-state h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
             color: var(--gray);
         }
 
-        .summary-note {
-            margin-top: 18px;
+        .back-link {
+            display: inline-flex;
+            margin-bottom: 20px;
+            color: var(--teal);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .flash {
             padding: 14px 16px;
             border-radius: 16px;
-            background: linear-gradient(135deg, rgba(102, 191, 191, 0.08), rgba(247, 107, 138, 0.08));
-            color: var(--dark-soft);
-            font-size: 0.86rem;
-            line-height: 1.55;
+            margin-bottom: 18px;
+            border: 1px solid transparent;
         }
 
-        .actions-bar {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 22px;
+        .flash-success {
+            background: #ecfdf5;
+            color: #166534;
+            border-color: #bbf7d0;
         }
 
-        .empty-box {
-            background: rgba(255, 255, 255, 0.97);
-            border-radius: 28px;
-            padding: 64px 36px;
-            text-align: center;
-            border: 2px dashed rgba(102, 191, 191, 0.28);
-            box-shadow: var(--shadow);
-        }
-
-        .empty-box .icon {
-            width: 88px;
-            height: 88px;
-            background: linear-gradient(135deg, var(--light-teal), #ffffff);
-            border-radius: 50%;
-            margin: 0 auto 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: var(--teal);
-            box-shadow: 0 10px 30px rgba(102, 191, 191, 0.16);
-        }
-
-        .empty-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.6rem;
-            margin-bottom: 10px;
-            color: var(--dark);
-        }
-
-        .empty-text {
-            color: var(--gray);
-            font-size: 0.95rem;
-            max-width: 480px;
-            margin: 0 auto 24px;
-            line-height: 1.7;
-        }
-
-        .empty-actions {
-            display: inline-flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-        }
-
-        footer {
-            background: var(--dark);
-            color: white;
-            padding: 30px 60px;
-            text-align: center;
-            font-size: 0.87rem;
-            opacity: 0.9;
+        .flash-error {
+            background: #fef2f2;
+            color: #991b1b;
+            border-color: #fecaca;
         }
 
         @media (max-width: 980px) {
-            .content-grid {
+            .order-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -760,643 +362,212 @@
             }
         }
 
-        @media (max-width: 768px) {
-            .header {
-                padding: 14px 20px;
-            }
-
+        @media (max-width: 720px) {
             .page {
-                padding: 28px 16px 60px;
+                padding: 22px 14px 52px;
             }
 
-            .order-hero {
-                padding: 26px 22px;
-                border-radius: 24px;
+            .page-title {
+                font-size: 2rem;
             }
 
-            .hero-top {
-                flex-direction: column;
+            .order-card,
+            .summary-card {
+                border-radius: 22px;
+                padding: 18px;
             }
 
-            .hero-order-id {
-                font-size: 1.7rem;
-            }
-
-            .hero-stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .product-row {
-                grid-template-columns: 74px minmax(0, 1fr);
-            }
-
-            .product-pricing {
-                grid-column: 1 / -1;
-                text-align: left;
-                border-top: 1px solid var(--border);
-                padding-top: 14px;
-                margin-top: 2px;
-            }
-        }
-
-        @media (max-width: 520px) {
-            .hero-stats {
+            .order-meta {
                 grid-template-columns: 1fr;
             }
 
-            .hero-stat {
-                border-right: none;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            .item {
+                grid-template-columns: 1fr;
             }
 
-            .hero-stat:last-child {
-                border-bottom: none;
+            .item img {
+                width: 100%;
+                height: 220px;
             }
 
-            .section-card,
-            .summary-card {
-                padding: 20px;
+            .item-top,
+            .item-actions {
+                flex-direction: column;
+                align-items: stretch;
             }
 
-            .empty-box {
-                padding: 48px 22px;
+            .item-price {
+                text-align: left;
+            }
+
+            .quantity-form {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .quantity-form input {
+                flex: 1;
+            }
+
+            .btn {
+                justify-content: center;
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
-@php
-    $isDraft = $isDraft ?? false;
-    $orderItems = $orderItems ?? collect();
-    $draftOrderToken = $draftOrderToken ?? (session('draft_order_token') ?: 'localStorageFallbackTokenPlaceholder()');
-@endphp
-<header class="header">
-    <a href="/" class="logo-container">
-        <div class="logo-icon">HA</div>
-        <span class="logo-text">Herb Atlas</span>
-    </a>
-</header>
+    <x-header />
+    @php
+        $orderItems = $orderItems ?? collect();
+        $status = strtolower((string) ($order->status ?? 'pending'));
+        $displayName = $order->display_name ?? ($order->name ?: ('Order #' . $order->id));
+        $itemsCount = (int) ($order->items_count ?? $orderItems->count());
+        $totalQuantity = (int) ($order->total_quantity ?? $orderItems->sum(fn ($item) => (int) data_get($item, 'pivot.quantity', 0)));
+        $grandTotal = (float) ($order->calculated_total ?? $orderItems->sum(fn ($item) => ((float) data_get($item, 'pivot.price', 0)) * ((int) data_get($item, 'pivot.quantity', 0))));
+    @endphp
 
-<main class="page">
-    <a href="{{ route('orders.index') }}" class="back-link">
-        <i class="fas fa-arrow-left"></i>
-        <span>Back to Orders</span>
-    </a>
-
-    @if (!$isDraft && isset($order) && $order)
-        @php
-            $itemsCount = $orderItems->count();
-            $totalQuantity = $orderItems->sum(function ($item) {
-                return (int) data_get($item, 'pivot.quantity', 0);
-            });
-            $grandTotal = isset($order->calculated_total)
-                ? (float) $order->calculated_total
-                : (float) $orderItems->sum(function ($item) {
-                    return (float) data_get($item, 'pivot.price', 0) * (int) data_get($item, 'pivot.quantity', 0);
-                });
-            $displayName = $order->name ?: ('Order #' . $order->id);
-            $orderDate = optional($order->created_at)->format('d M Y');
-            $orderDateFull = optional($order->created_at)->format('D, d F Y');
-            $pivotQuantities = $orderItems->map(fn ($item) => (int) data_get($item, 'pivot.quantity', 0));
-            $pivotPrices = $orderItems->map(fn ($item) => (float) data_get($item, 'pivot.price', 0));
-            $statusName = strtolower((string) ($order->status ?? 'completed'));
-            $orderStatusLabel = match ($statusName) {
-                'pending', 'processing', 'in_progress' => 'Processing',
-                'cancelled', 'canceled', 'failed' => 'Cancelled',
-                'completed', 'delivered', 'paid' => 'Completed',
-                default => 'Completed',
-            };
-            $statusClass = match ($statusName) {
-                'pending', 'processing', 'in_progress' => 'status-processing',
-                'cancelled', 'canceled', 'failed' => 'status-cancelled',
-                'completed', 'delivered', 'paid' => 'status-completed',
-                default => 'status-default',
-            };
-        @endphp
-
-        <div class="content-grid">
-            <div class="main-column">
-                <section class="order-hero">
-                    <div class="hero-content">
-                        <div class="hero-top">
-                            <div>
-                                <div class="hero-label">Order Reference</div>
-                                <div class="hero-order-id">#{{ $displayName }}</div>
-                                <div class="hero-subline">
-                                    <span><i class="far fa-calendar-alt"></i> {{ $orderDateFull ?: 'Recently created' }}</span>
-                                    <span><i class="fas fa-seedling"></i> Herb Atlas Collection</span>
-                                </div>
-                            </div>
-                            <div class="hero-status {{ $statusClass }}">
-                                <span class="status-dot"></span>
-                                {{ $orderStatusLabel }}
-                            </div>
-                        </div>
-
-                        <div class="hero-stats">
-                            <div class="hero-stat">
-                                <span class="hero-stat-label">Products</span>
-                                <span class="hero-stat-value">{{ $itemsCount }}</span>
-                            </div>
-                            <div class="hero-stat">
-                                <span class="hero-stat-label">Total Items</span>
-                                <span class="hero-stat-value highlight">{{ $totalQuantity }}</span>
-                            </div>
-                            <div class="hero-stat">
-                                <span class="hero-stat-label">Placed On</span>
-                                <span class="hero-stat-value">{{ $orderDate ?: '—' }}</span>
-                            </div>
-                            <div class="hero-stat">
-                                <span class="hero-stat-label">Order Total</span>
-                                <span class="hero-stat-value coral">{{ number_format($grandTotal, 2) }} MAD</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="card section-card">
-                    <div class="section-heading">
-                        <div>
-                            <div class="section-title">
-                                <i class="fas fa-shopping-bag"></i>
-                                <span>Products in this Order</span>
-                            </div>
-                            <div class="section-subtitle">A curated summary of every item included in your completed purchase.</div>
-                        </div>
-                    </div>
-
-                    @if ($itemsCount > 0)
-                        <div class="products-list">
-                            @foreach ($orderItems as $item)
-                                @php
-                                    $quantity = (int) data_get($item, 'pivot.quantity', 0);
-                                    $unitPrice = (float) data_get($item, 'pivot.price', 0);
-                                    $subtotal = $quantity * $unitPrice;
-                                    $picture = optional($item->pictures->first())->url ?? optional($item->pictures->first())->image_path ?? optional($item->pictures->first())->path ?? $item->picture ?? 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=300';
-                                    $categoryName = optional($item->category)->name ?? 'Natural Product';
-                                @endphp
-                                <article class="product-row">
-                                    <div class="product-thumb-wrap">
-                                        <img src="{{ $picture }}" alt="{{ $item->name }}" class="product-thumb-img">
-                                    </div>
-
-                                    <div class="product-info">
-                                        <h3 class="product-name">{{ $item->name }}</h3>
-                                        <div class="product-meta">
-                                            <span class="product-category-tag">
-                                                <i class="fas fa-leaf"></i>
-                                                {{ $categoryName }}
-                                            </span>
-                                            <span class="product-meta-chip">
-                                                <i class="fas fa-box-open"></i>
-                                                Ordered item
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="product-pricing">
-                                        <div class="price-unit">Unit: <strong>{{ number_format($unitPrice, 2) }} MAD</strong></div>
-                                        <div class="price-qty">
-                                            <span class="qty-badge">×{{ $quantity }}</span>
-                                        </div>
-                                        <span class="price-subtotal">{{ number_format($subtotal, 2) }} MAD</span>
-                                    </div>
-                                </article>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="empty-box" style="padding: 44px 24px;">
-                            <div class="icon"><i class="fas fa-box-open"></i></div>
-                            <h2 class="empty-title" style="font-size:1.3rem;">No order items found</h2>
-                            <p class="empty-text" style="margin-bottom:0;">This order currently has no associated products to display.</p>
-                        </div>
-                    @endif
-                </section>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">{{ $displayName }}</h1>
+                <p class="page-subtitle">Database-backed order details with live totals, item controls, and stock-safe updates.</p>
             </div>
+            <div class="status-badge" aria-live="polite">
+                <small>Status</small>
+                <strong>{{ ucfirst($status) }}</strong>
+            </div>
+        </div>
 
-            <aside class="side-column">
-                <section class="card summary-card">
-                    <h2 class="summary-title">
-                        <i class="fas fa-receipt"></i>
-                        Order Summary
-                    </h2>
+        @if(session('success'))
+            <div class="flash flash-success">{{ session('success') }}</div>
+        @endif
 
-                    <div class="summary-rows">
-                        @foreach ($orderItems as $item)
+        @if($errors->any())
+            <div class="flash flash-error">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
+        <div class="order-grid">
+            <section class="card order-card" aria-label="Order items">
+                    <div class="section-title">
+                        <i class="fas fa-boxes" style="color: var(--teal);"></i>
+                        Order items
+                    </div>
+
+                <div class="order-meta">
+                    <div class="meta-box">
+                        <small>Order ID</small>
+                        <strong>#{{ $order->id }}</strong>
+                    </div>
+                    <div class="meta-box">
+                        <small>Placed</small>
+                        <strong>{{ optional($order->created_at)->format('d M Y H:i') ?? 'recently' }}</strong>
+                    </div>
+                    <div class="meta-box">
+                        <small>Products</small>
+                        <strong>{{ $itemsCount }}</strong>
+                    </div>
+                    <div class="meta-box">
+                        <small>Total quantity</small>
+                        <strong>{{ $totalQuantity }}</strong>
+                    </div>
+                </div>
+
+                @if($orderItems->isEmpty())
+                    <div class="empty-state">
+                        <h3>No products were found for this order.</h3>
+                        <p>The order has no line items attached.</p>
+                    </div>
+                @else
+                    <div class="items">
+                        @foreach($orderItems as $item)
                             @php
                                 $quantity = (int) data_get($item, 'pivot.quantity', 0);
-                                $lineTotal = (float) data_get($item, 'pivot.price', 0) * $quantity;
+                                $unitPrice = (float) data_get($item, 'pivot.price', 0);
+                                $lineTotal = $quantity * $unitPrice;
+                                $image = $item->pictures->first()?->img_path
+                                    ? asset('storage/' . $item->pictures->first()->img_path)
+                                    : 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=600';
                             @endphp
-                            <div class="summary-row">
-                                <span class="label">{{ $item->name }} ×{{ $quantity }}</span>
-                                <span class="value">{{ number_format($lineTotal, 2) }} MAD</span>
-                            </div>
-                        @endforeach
-                        <div class="summary-row">
-                            <span class="label">Shipping</span>
-                            <span class="value success">Free</span>
-                        </div>
-                        <div class="summary-row">
-                            <span class="label">Status</span>
-                            <span class="value">Confirmed</span>
-                        </div>
-                    </div>
+                            <article class="item">
+                                <img src="{{ $image }}" alt="{{ $item->name }}">
+                                <div class="item-body">
+                                    <div class="item-top">
+                                        <div>
+                                            <div class="item-name">{{ $item->name }}</div>
+                                            <div class="item-category">{{ optional($item->category)->title ?? 'Natural Product' }}</div>
+                                        </div>
+                                        <div class="item-price">
+                                            <strong>{{ number_format($unitPrice, 2) }} MAD</strong>
+                                            <span>Subtotal: {{ number_format($lineTotal, 2) }} MAD</span>
+                                        </div>
+                                    </div>
 
-                    <div class="summary-total-row">
-                        <span class="total-label">Grand Total</span>
-                        <span class="total-value">{{ number_format($grandTotal, 2) }} <span class="currency">MAD</span></span>
-                    </div>
+                                    <div class="item-actions">
+                                        @if($order->status === \App\Models\Order::STATUS_PENDING)
+                                            <form method="POST" action="{{ route('orders.update-item', [$order, $item]) }}" class="quantity-form">
+                                                @csrf
+                                                @method('PATCH')
+                                                <label class="screen-reader-only" for="quantity-{{ $item->id }}">Quantity</label>
+                                                <input id="quantity-{{ $item->id }}" type="number" name="quantity" value="{{ $quantity }}" min="1" step="1" inputmode="numeric">
+                                                <button type="submit" class="btn btn-update">
+                                                    <i class="fas fa-rotate"></i>
+                                                    Update
+                                                </button>
+                                            </form>
 
-                    <div class="status-panel">
-                        <div class="status-pill">
-                            <span class="label">Order Status</span>
-                            <span class="value">{{ $orderStatusLabel }}</span>
-                        </div>
-                        <div class="status-pill">
-                            <span class="label">Items Count</span>
-                            <span class="value">{{ $itemsCount }}</span>
-                        </div>
-                        <div class="status-pill">
-                            <span class="label">Products Total</span>
-                            <span class="value">{{ number_format($grandTotal, 2) }} MAD</span>
-                        </div>
-                        <div class="status-pill">
-                            <span class="label">Payment</span>
-                            <span class="value">Paid on Delivery</span>
-                        </div>
-                    </div>
-
-                    <div class="summary-note">
-                        This order is stored in your account history and reflects the saved database values from the order-product pivot table.
-                    </div>
-
-                    <div class="actions-bar">
-                        <a href="{{ url('/products') }}" class="btn-primary">
-                            <i class="fas fa-leaf"></i>
-                            Continue Shopping
-                        </a>
-                    </div>
-                </section>
-            </aside>
-        </div>
-    @else
-        <div id="draft-order-root"></div>
-    @endif
-</main>
-
-<footer>&copy; 2026 Herb Atlas — Natural Products from Morocco</footer>
-
-    @if ($isDraft)
-<script>
-    const draftOrderRoot = document.getElementById('draft-order-root');
-    const draftOrderStorageKey = 'herb_order';
-    const draftOrderToken = @json($draftOrderToken ?: 'draft');
-    const draftBackUrl = @json(route('orders.index'));
-    const productsUrl = @json(url('/products'));
-    const checkoutUrl = @json(route('orders.checkout'));
-    const csrfToken = @json(csrf_token());
-    const orderLookupUrl = @json(url('/orders'));
-
-    function formatMoney(value) {
-        const numericValue = Number(value || 0);
-        return numericValue.toFixed(2);
-    }
-
-    function normalizeDraftItems(items) {
-        if (!Array.isArray(items)) {
-            return [];
-        }
-
-        return items
-            .map(function (item) {
-                const quantity = Math.max(1, parseInt(item.quantity, 10) || 1);
-                const price = parseFloat(item.price) || 0;
-                const productId = item.product_id || item.id;
-
-                return {
-                    id: productId,
-                    product_id: productId,
-                    name: item.name || 'Unnamed Product',
-                    quantity: quantity,
-                    price: price,
-                    image: item.image || item.picture || 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=300',
-                    category: item.category || 'Natural Product'
-                };
-            })
-            .filter(function (item) {
-                return item.product_id !== undefined && item.product_id !== null;
-            });
-    }
-
-    function loadDraftOrder() {
-        try {
-            const raw = localStorage.getItem(draftOrderStorageKey);
-            if (!raw) {
-                return [];
-            }
-
-            return normalizeDraftItems(JSON.parse(raw));
-        } catch (error) {
-            return [];
-        }
-    }
-
-    function saveDraftOrder(items) {
-        localStorage.setItem(draftOrderStorageKey, JSON.stringify(items));
-    }
-
-    function removeDraftItem(productId) {
-        const items = loadDraftOrder().filter(function (item) {
-            return String(item.product_id) !== String(productId);
-        });
-
-        saveDraftOrder(items);
-        renderDraftOrder();
-    }
-
-    function clearDraftOrder() {
-        if (window.confirm('Remove all items from this draft order?')) {
-            localStorage.removeItem(draftOrderStorageKey);
-            localStorage.removeItem('herb_order_id');
-            renderDraftOrder();
-        }
-    }
-
-    async function completeCheckout() {
-        const items = loadDraftOrder();
-
-        if (!items.length) {
-            window.alert('Your cart is empty');
-            return;
-        }
-
-        const button = document.querySelector('.btn-checkout');
-
-        if (button) {
-            button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-        }
-
-        try {
-            const response = await fetch(checkoutUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify({
-                    items: items
-                })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to store order');
-            }
-
-            if (data.message === 'data stored') {
-                localStorage.removeItem(draftOrderStorageKey);
-                localStorage.removeItem('herb_order_id');
-                window.alert('data stored');
-                window.location.href = '/orders/' + data.order_id;
-                return;
-            }
-
-            throw new Error('Unexpected response from server');
-        } catch (error) {
-            window.alert(error.message || 'Failed to store order');
-        } finally {
-            if (button) {
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-credit-card"></i> Complete Order';
-            }
-        }
-    }
-
-    function buildEmptyState() {
-        draftOrderRoot.innerHTML = `
-            <div class="empty-box">
-                <div class="icon"><i class="fas fa-box-open"></i></div>
-                <h2 class="empty-title">Your draft order is empty</h2>
-                <p class="empty-text">There are no products saved in your pending order yet. Explore Herb Atlas products and add your favorite natural essentials to begin a new order.</p>
-                <div class="empty-actions">
-                    <a href="${productsUrl}" class="btn-primary" style="width:auto;padding-left:22px;padding-right:22px;">
-                        <i class="fas fa-leaf"></i>
-                        Browse Products
-                    </a>
-                    <a href="${draftBackUrl}" class="btn-secondary-link">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Orders
-                    </a>
-                </div>
-            </div>
-        `;
-    }
-
-    function renderDraftOrder() {
-        const items = loadDraftOrder();
-
-        if (!items.length) {
-            if (!draftOrderToken || draftOrderToken === 'draft') {
-                buildEmptyState();
-                return;
-            }
-        }
-
-        const itemsCount = items.length;
-        const totalQuantity = items.reduce(function (sum, item) {
-            return sum + item.quantity;
-        }, 0);
-        const subtotal = items.reduce(function (sum, item) {
-            return sum + (item.price * item.quantity);
-        }, 0);
-        const shippingLabel = 'Free';
-        const today = new Date().toLocaleDateString('en-GB', {
-            weekday: 'short',
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-        });
-
-        const productRows = items.map(function (item) {
-            const lineTotal = item.price * item.quantity;
-
-            return `
-                <article class="product-row">
-                    <div class="product-thumb-wrap">
-                        <img src="${item.image}" alt="${item.name}" class="product-thumb-img" onerror="this.src='https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=300'">
-                    </div>
-
-                    <div class="product-info">
-                        <h3 class="product-name">${item.name}</h3>
-                        <div class="product-meta">
-                            <span class="product-category-tag">
-                                <i class="fas fa-leaf"></i>
-                                ${item.category}
-                            </span>
-                            <span class="product-meta-chip">
-                                <i class="fas fa-clock"></i>
-                                Saved in draft
-                            </span>
-                        </div>
-                        <button type="button" class="btn-remove-item" onclick="removeDraftItem('${item.product_id}')">
-                            <i class="fas fa-trash-alt"></i>
-                            Remove item
-                        </button>
-                    </div>
-
-                    <div class="product-pricing">
-                        <div class="price-unit">Unit: <strong>${formatMoney(item.price)} MAD</strong></div>
-                        <div class="price-qty">
-                            <span class="qty-badge">×${item.quantity}</span>
-                        </div>
-                        <span class="price-subtotal">${formatMoney(lineTotal)} MAD</span>
-                    </div>
-                </article>
-            `;
-        }).join('');
-
-        const summaryRows = items.map(function (item) {
-            return `
-                <div class="summary-row">
-                    <span class="label">${item.name} ×${item.quantity}</span>
-                    <span class="value">${formatMoney(item.price * item.quantity)} MAD</span>
-                </div>
-            `;
-        }).join('');
-
-        draftOrderRoot.innerHTML = `
-            <div class="content-grid">
-                <div class="main-column">
-                    <section class="order-hero">
-                        <div class="hero-content">
-                            <div class="hero-top">
-                                <div>
-                                    <div class="hero-label">Draft Reference</div>
-                                    <div class="hero-order-id">#${draftOrderToken}</div>
-                                    <div class="hero-subline">
-                                        <span><i class="far fa-calendar-alt"></i> ${today}</span>
-                                        <span><i class="fas fa-hourglass-half"></i> Waiting for checkout</span>
+                                            <form method="POST" action="{{ route('orders.remove-item', [$order, $item]) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-remove" onclick="return confirm('Remove this item?')">
+                                                    <i class="fas fa-trash"></i>
+                                                    Remove
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </div>
-                                <div class="hero-status status-draft">
-                                    <span class="status-dot"></span>
-                                    Pending Checkout
-                                </div>
-                            </div>
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
+            </section>
 
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <span class="hero-stat-label">Products</span>
-                                    <span class="hero-stat-value">${itemsCount}</span>
-                                </div>
-                                <div class="hero-stat">
-                                    <span class="hero-stat-label">Total Items</span>
-                                    <span class="hero-stat-value highlight">${totalQuantity}</span>
-                                </div>
-                                <div class="hero-stat">
-                                    <span class="hero-stat-label">Shipping</span>
-                                    <span class="hero-stat-value highlight">${shippingLabel}</span>
-                                </div>
-                                <div class="hero-stat">
-                                    <span class="hero-stat-label">Order Total</span>
-                                    <span class="hero-stat-value coral">${formatMoney(subtotal)} MAD</span>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="card section-card">
-                        <div class="section-heading">
-                            <div>
-                                <div class="section-title">
-                                    <i class="fas fa-shopping-bag"></i>
-                                    <span>Products in this Draft</span>
-                                </div>
-                                <div class="section-subtitle">Review, remove, or refine the products saved before completing your order.</div>
-                            </div>
-                        </div>
-
-                        <div class="products-list">${productRows}</div>
-                    </section>
+            <aside class="card summary-card" aria-label="Order summary">
+                <div class="section-title">
+                    <i class="fas fa-receipt" style="color: var(--teal);"></i>
+                    Summary
                 </div>
 
-                <aside class="side-column">
-                    <section class="card summary-card">
-                        <h2 class="summary-title">
-                            <i class="fas fa-receipt"></i>
-                            Order Summary
-                        </h2>
-
-                        <div class="summary-rows">
-                            ${summaryRows}
-                            <div class="summary-row">
-                                <span class="label">Shipping</span>
-                                <span class="value success">${shippingLabel}</span>
-                            </div>
-                            <div class="summary-row">
-                                <span class="label">Status</span>
-                                <span class="value">Draft</span>
-                            </div>
-                        </div>
-
-                        <div class="summary-total-row">
-                            <span class="total-label">Grand Total</span>
-                            <span class="total-value">${formatMoney(subtotal)} <span class="currency">MAD</span></span>
-                        </div>
-
-                        <div class="summary-note">
-                            This order is stored locally in your browser until checkout is completed. Removing items or clearing the draft updates it instantly.
-                        </div>
-
-                        <div class="actions-bar">
-                            <button type="button" class="btn-primary btn-checkout" onclick="completeCheckout()">
-                                <i class="fas fa-credit-card"></i>
-                                Complete Order
-                            </button>
-                            <button type="button" class="btn-clear" onclick="clearDraftOrder()">
-                                <i class="fas fa-trash-alt"></i>
-                                Clear Draft Order
-                            </button>
-                        </div>
-                    </section>
-                </aside>
-            </div>
-        `;
-    }
-
-    function renderSavedOrderFallback() {
-        draftOrderRoot.innerHTML = `
-            <div class="empty-box">
-                <div class="icon"><i class="fas fa-box-open"></i></div>
-                <h2 class="empty-title">Order not found</h2>
-                <p class="empty-text">The saved database order could not be loaded right now. Please return to your orders list or continue browsing products.</p>
-                <div class="empty-actions">
-                    <a href="${orderLookupUrl}" class="btn-primary" style="width:auto;padding-left:22px;padding-right:22px;">
-                        <i class="fas fa-receipt"></i>
-                        View Orders
-                    </a>
-                    <a href="${productsUrl}" class="btn-secondary-link">
-                        <i class="fas fa-arrow-left"></i>
-                        Browse Products
-                    </a>
+                <div class="summary-row">
+                    <span>Products</span>
+                    <strong>{{ $itemsCount }}</strong>
                 </div>
-            </div>
-        `;
-    }
+                <div class="summary-row">
+                    <span>Total quantity</span>
+                    <strong>{{ $totalQuantity }}</strong>
+                </div>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <strong>{{ number_format($grandTotal, 2) }} MAD</strong>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <strong>Free</strong>
+                </div>
 
-    window.removeDraftItem = removeDraftItem;
-    window.clearDraftOrder = clearDraftOrder;
-    window.completeCheckout = completeCheckout;
+                <div class="summary-total">
+                    <strong>Total</strong>
+                    <span>{{ number_format($grandTotal, 2) }} MAD</span>
+                </div>
 
-    if (!loadDraftOrder().length && draftOrderToken && draftOrderToken !== 'draft') {
-        renderSavedOrderFallback();
-    } else {
-        renderDraftOrder();
-    }
-</script>
-@endif
+                <p class="page-subtitle" style="margin-top: 14px;">
+                    All totals are calculated from the stored pivot data and remain accurate after updates.
+                </p>
+            </aside>
+        </div>
+    </main>
 </body>
 </html>

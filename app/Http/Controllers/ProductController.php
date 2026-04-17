@@ -6,14 +6,19 @@ use App\Http\Requests\ProductSearchRequest;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Category;
-use App\Models\Picture;
 use App\Models\Product;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use App\Services\ProductService;
 
 class ProductController extends Controller
 {
-    public function index(ProductSearchRequest $request)
+    protected $productService;
+
+    public function __construct(ProductService $productService)
+    {
+        $this->productService = $productService;
+    }
+
+    public function index(ProductSearchRequest $request): \Illuminate\Http\JsonResponse|\Illuminate\View\View
     {
         $validated = $request->validated();
         $search = $validated['search'] ?? null;
@@ -33,12 +38,13 @@ class ProductController extends Controller
                 });
             });
 
-        $products = $query->latest()->get();
+        $products = $query->latest()->paginate(20);
         $categories = Category::all();
+        $isAdmin = auth()->check() && auth()->user()->role?->status === 'admin';
 
         if ($isAjax) {
             return response()->json([
-                'products' => $products->map(function ($product) {
+                'products' => $products->map(function ($product) use ($isAdmin) {
                     $picture = $product->pictures->first();
                     $imagePath = $picture?->img_path;
 
@@ -52,10 +58,17 @@ class ProductController extends Controller
                         'category' => optional($product->category)->title,
                         'image' => $imagePath ? asset('storage/' . $imagePath) : null,
                         'details_url' => route('product.show', $product->id),
-                        'edit_url' => route('products.edit', $product->id),
-                        'delete_url' => route('products.destroy', $product->id),
+                        'edit_url' => $isAdmin ? route('products.edit', $product->id) : null,
+                        'delete_url' => $isAdmin ? route('products.destroy', $product->id) : null,
                     ];
                 })->values(),
+                'pagination' => [
+                    'current_page' => $products->currentPage(),
+                    'last_page' => $products->lastPage(),
+                    'per_page' => $products->perPage(),
+                    'total' => $products->total(),
+                    'links' => $products->links()->toHtml(),
+                ],
                 'message' => $products->isEmpty() ? 'No products matched your search.' : null,
             ]);
         }
@@ -63,7 +76,7 @@ class ProductController extends Controller
         return view('products', compact('products', 'categories'));
     }
 
-    public function edit($id)
+    public function edit(int $id): \Illuminate\View\View
     {
         $product = Product::with(['pictures', 'category'])->findOrFail($id);
         $categories = Category::all();
@@ -71,74 +84,38 @@ class ProductController extends Controller
         return view('productEdit', compact('product', 'categories'));
     }
 
-    public function update(UpdateProductRequest $request, $id)
+    public function update(UpdateProductRequest $request, int $id)
     {
-        $product = Product::with('pictures')->findOrFail($id);
-        $category = Category::where('title', $request->category)->firstOrFail();
+        $product = Product::findOrFail($id);
 
-        DB::transaction(function () use ($request, $product, $category) {
-            $product->update([
-                'name' => $request->name,
-                'description' => $request->description,
-                'price' => $request->price,
-                'stock' => $request->stock,
-                'category_id' => $category->id,
-            ]);
+        $deletedPictureIds = $request->input('deleted_pictures', []);
+        if (! empty($deletedPictureIds)) {
+            $ownedPictureIds = $product->pictures()->pluck('id')->toArray();
+            $deletedPictureIds = array_intersect($deletedPictureIds, $ownedPictureIds);
+        }
 
-            $deletedPictures = $request->input('deleted_pictures', []);
-            if (!empty($deletedPictures)) {
-                $picturesToDelete = $product->pictures()->whereIn('id', $deletedPictures)->get();
-
-                foreach ($picturesToDelete as $picture) {
-                    if (Storage::disk('public')->exists($picture->img_path)) {
-                        Storage::disk('public')->delete($picture->img_path);
-                    }
-                    $picture->delete();
-                }
-            }
-
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $path = $image->store('products', 'public');
-                    Picture::create([
-                        'product_id' => $product->id,
-                        'img_path' => $path,
-                    ]);
-                }
-            }
-        });
+        $this->productService->updateProduct(
+            $product,
+            $request->validated(),
+            $request->file('images'),
+            $deletedPictureIds
+        );
 
         return redirect()->route('products.index')->with('success', 'Product updated successfully!');
     }
 
     public function store(StoreProductRequest $request)
     {
-        $category = Category::where('title', $request->category)->firstOrFail();
-
-        $product = Product::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'stock' => $request->stock,
-            'category_id' => $category->id,
-        ]);
-
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('products', 'public');
-
-                Picture::create([
-                    'product_id' => $product->id,
-                    'img_path' => $path,
-                ]);
-            }
-        }
+        $this->productService->storeProduct(
+            $request->validated(),
+            $request->file('images')
+        );
 
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
 
 
-    public function show($id)
+    public function show(int $id): \Illuminate\View\View
     {
         $product = Product::with(['category', 'pictures'])->findOrFail($id);
 
@@ -149,25 +126,14 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        DB::transaction(function () use ($product) {
-            $product->load(['pictures', 'feedbacks', 'reports', 'orders']);
+        $this->productService->deleteProduct($product);
 
-            foreach ($product->pictures as $picture) {
-                if (Storage::disk('public')->exists($picture->img_path)) {
-                    Storage::disk('public')->delete($picture->img_path);
-                }
-                $picture->delete();
-            }
+        $message = 'Product and all associated images removed successfully.';
 
-            $product->orders()->detach();
-            $product->feedbacks()->delete();
-            $product->reports()->delete();
-
-            $product->delete();
-        });
+        if (request()->expectsJson()) {
+            return response()->json(['message' => $message]);
+        }
 
         return redirect()->route('products.index')->with('success', 'Product and all associated images removed successfully.');
     }
-
-
 }

@@ -10,8 +10,7 @@ class UpdatePhoneRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Keep this true as long as you have 'auth' middleware on the route
-        return true;
+        return auth()->check();
     }
 
     public function rules(): array

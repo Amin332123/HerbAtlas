@@ -35,7 +35,6 @@
             min-height: 100vh;
         }
 
-        /* --- Header --- */
         .header {
             background: white;
             padding: 20px 60px;
@@ -153,7 +152,6 @@
             box-shadow: 0 5px 15px rgba(247, 107, 138, 0.3);
         }
 
-        /* --- Toast --- */
         .toast-container {
             position: fixed;
             top: 100px;
@@ -179,7 +177,6 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        /* --- Breadcrumb --- */
         .breadcrumb {
             max-width: 1300px;
             margin: 0 auto;
@@ -222,7 +219,6 @@
             font-weight: 600;
         }
 
-        /* --- Main Content --- */
         .main-content {
             max-width: 1300px;
             margin: 0 auto;
@@ -238,7 +234,6 @@
             box-shadow: var(--shadow);
         }
 
-        /* --- Product Gallery --- */
         .product-gallery {
             flex: 1;
             max-width: 550px;
@@ -336,7 +331,6 @@
             box-shadow: 0 4px 15px rgba(102, 191, 191, 0.3);
         }
 
-        /* --- Product Info --- */
         .product-info {
             flex: 1;
             display: flex;
@@ -365,24 +359,6 @@
             line-height: 1.2;
         }
 
-        .product-rating {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .stars {
-            display: flex;
-            gap: 3px;
-            color: #fbbf24;
-        }
-
-        .rating-count {
-            color: var(--gray);
-            font-size: 0.95rem;
-        }
-
         .product-price-section {
             display: flex;
             align-items: baseline;
@@ -402,22 +378,6 @@
             font-size: 1.2rem;
             font-weight: 500;
             color: var(--gray);
-        }
-
-        .old-price {
-            font-size: 1.3rem;
-            color: var(--gray);
-            text-decoration: line-through;
-            opacity: 0.6;
-        }
-
-        .discount-badge {
-            background: linear-gradient(135deg, var(--coral), #ff7b9a);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 700;
         }
 
         .product-description {
@@ -443,7 +403,6 @@
             line-height: 1.8;
         }
 
-        /* --- Product Meta Info --- */
         .product-meta-info {
             display: flex;
             flex-wrap: wrap;
@@ -500,7 +459,6 @@
             color: var(--coral);
         }
 
-        /* --- Quantity Selector --- */
         .quantity-section {
             margin-bottom: 30px;
         }
@@ -542,6 +500,17 @@
             color: white;
         }
 
+        .quantity-btn:disabled {
+            background: var(--gray);
+            color: white;
+            cursor: not-allowed;
+        }
+
+        .quantity-btn:disabled:hover {
+            background: var(--gray);
+            color: white;
+        }
+
         .quantity-input {
             width: 70px;
             height: 45px;
@@ -560,17 +529,15 @@
             box-shadow: 0 0 0 3px rgba(102, 191, 191, 0.2);
         }
 
-        /* --- Action Buttons --- */
         .action-buttons {
             display: flex;
             gap: 15px;
             margin-top: auto;
         }
 
-        .add-to-cart-btn {
-            flex: 1;
+        .add-to-cart-btn,
+        .buy-now-btn {
             padding: 18px 35px;
-            background: linear-gradient(135deg, var(--teal), #8fd3d3);
             color: white;
             border: none;
             border-radius: 16px;
@@ -582,37 +549,24 @@
             justify-content: center;
             gap: 12px;
             transition: all 0.3s;
+        }
+
+        .add-to-cart-btn {
+            flex: 1;
+            background: linear-gradient(135deg, var(--teal), #8fd3d3);
             box-shadow: 0 6px 20px rgba(102, 191, 191, 0.35);
         }
 
-        .add-to-cart-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(102, 191, 191, 0.45);
-        }
-
         .buy-now-btn {
-            padding: 18px 35px;
             background: linear-gradient(135deg, var(--coral), #ff7b9a);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            transition: all 0.3s;
             box-shadow: 0 6px 20px rgba(247, 107, 138, 0.35);
         }
 
+        .add-to-cart-btn:hover,
         .buy-now-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(247, 107, 138, 0.45);
         }
 
-        /* --- Features Section --- */
         .features-section {
             margin-top: 50px;
         }
@@ -665,7 +619,6 @@
             font-size: 0.9rem;
         }
 
-        /* --- Back Button --- */
         .back-btn {
             display: inline-flex;
             align-items: center;
@@ -690,7 +643,6 @@
             transform: translateX(-5px);
         }
 
-        /* --- Responsive Design --- */
         @media (max-width: 1024px) {
             .product-details-container {
                 flex-direction: column;
@@ -781,7 +733,7 @@
         </nav>
 
         <div class="header-actions">
-            <button class="cart-btn" onclick="window.location.href='{{ url('/orders/draft') }}'">
+            <button class="cart-btn" onclick="window.location.href='{{ route('order.draft') }}'">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-badge" id="cartBadge">0</span>
             </button>
@@ -800,8 +752,6 @@
         @endif
     </div>
 
-   
-
     <main class="main-content">
         <a href="{{ url('/products') }}" class="back-btn">
             <i class="fas fa-arrow-left"></i> Back to Products
@@ -816,9 +766,9 @@
                     <button class="wishlist-btn" onclick="toggleWishlist(this)">
                         <i class="far fa-heart"></i>
                     </button>
-                    <img src="{{  asset('storage/' . $product->pictures->first()->img_path)  }}" class="main-image" id="mainImage" alt="{{ $product->name }}">
+                    <img src="{{ asset('storage/' . $product->pictures->first()->img_path) }}" class="main-image" id="mainImage" alt="{{ $product->name }}">
                 </div>
-                
+
                 @if($product->pictures && $product->pictures->count() > 0)
                     <div class="thumbnail-gallery">
                         @foreach($product->pictures as $index => $picture)
@@ -841,22 +791,8 @@
 
                 <h1 class="product-title">{{ $product->name }}</h1>
 
-                <div class="product-rating">
-                    <div class="stars">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
-                    </div>
-                    <span class="rating-count">({{ rand(12, 150) }} reviews)</span>
-                </div>
-
                 <div class="product-price-section">
                     <span class="product-price">{{ number_format($product->price, 2) }} <span>MAD</span></span>
-                    {{-- Uncomment if you have discount feature --}}
-                    {{-- <span class="old-price">{{ number_format($product->old_price, 2) }} MAD</span> --}}
-                    {{-- <span class="discount-badge">-20%</span> --}}
                 </div>
 
                 <div class="product-description">
@@ -903,11 +839,11 @@
                 <div class="quantity-section">
                     <label class="quantity-label">Quantity</label>
                     <div class="quantity-selector">
-                        <button class="quantity-btn" onclick="decreaseQuantity()">
+                        <button class="quantity-btn" id="decreaseBtn" onclick="decreaseQuantity()">
                             <i class="fas fa-minus"></i>
                         </button>
-                        <input type="number" class="quantity-input" id="quantityInput" value="1" min="1" max="{{ $product->stock ?? 100 }}">
-                        <button class="quantity-btn" onclick="increaseQuantity()">
+                        <input type="number" class="quantity-input" id="quantityInput" value="1" min="1" max="{{ $product->stock ?? 100 }}" onchange="updateQuantityButtons()">
+                        <button class="quantity-btn" id="increaseBtn" onclick="increaseQuantity()">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
@@ -959,60 +895,101 @@
     </main>
 
     <script>
-        // --- LocalStorage Integration ---
-        
-        // Load initial badge count
-        document.addEventListener('DOMContentLoaded', () => {
-            updateBadge();
-        });
+        const DRAFT_ORDER_KEY = 'herb_draft_cart';
+
+        function safeParseJson(raw) {
+            try {
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function getProductImageUrl() {
+            @if($product->pictures && $product->pictures->count() > 0)
+                return @json(asset('storage/' . $product->pictures->first()->img_path));
+            @elseif($product->picture)
+                return @json(asset('storage/' . $product->picture->img_path));
+            @else
+                return 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=800';
+            @endif
+        }
+
+        function normalizeDraftItem(item) {
+            const id = item && (item.id ?? item.product_id ?? item.productId ?? item.product?.id);
+            return {
+                id: id !== undefined && id !== null ? Number(id) : 0,
+                name: String(item?.name ?? item?.product?.name ?? @json($product->name)).trim() || @json($product->name),
+                price: Number.parseFloat(item?.price ?? item?.unit_price ?? @json($product->price)) || 0,
+                quantity: Math.max(Number.parseInt(item?.quantity ?? 1, 10) || 1, 1),
+                image: String(item?.image ?? item?.picture ?? getProductImageUrl()),
+                category: String(item?.category ?? item?.product?.category?.title ?? @json($product->category->title ?? '')),
+                stock: Number.parseInt(item?.stock ?? @json($product->stock ?? 0), 10) || 0
+            };
+        }
 
         function getDraftOrder() {
-            const order = localStorage.getItem('herb_order');
-            return order ? JSON.parse(order) : [];
+            const raw = localStorage.getItem(DRAFT_ORDER_KEY);
+            const parsed = raw ? safeParseJson(raw) : [];
+            const normalized = parsed
+                .map(normalizeDraftItem)
+                .filter(item => item.id && item.quantity > 0 && item.price >= 0);
+
+            if (JSON.stringify(parsed) !== JSON.stringify(normalized)) {
+                localStorage.setItem(DRAFT_ORDER_KEY, JSON.stringify(normalized));
+            }
+
+            return normalized;
         }
 
         function updateBadge() {
             const order = getDraftOrder();
             const badge = document.getElementById('cartBadge');
             if (badge) {
-                // Total unique products or total quantity? Let's go with unique products count
-                badge.textContent = order.length;
+                badge.textContent = order.reduce((count, item) => count + item.quantity, 0);
             }
         }
 
-        // Add to cart logic
-        function addToCart() {
-            const quantity = parseInt(document.getElementById('quantityInput').value);
-            
-            const product = {
-                id: "{{ $product->id }}",
-                name: "{{ addslashes($product->name) }}",
-                price: "{{ $product->price }}",
-                image: "{{ asset('storage/' . $product->pictures->first()->img_path) }}",
-                quantity: quantity
-            };
+        function persistCart(items) {
+            localStorage.setItem(DRAFT_ORDER_KEY, JSON.stringify(items));
+            updateBadge();
+            window.HerbAtlasDraftCart = window.HerbAtlasDraftCart || {};
+            window.HerbAtlasDraftCart.items = items;
+            window.HerbAtlasDraftCart.updateDraftCartBadge?.();
+        }
 
-            let currentOrder = getDraftOrder();
-            const existingIndex = currentOrder.findIndex(item => item.id === product.id);
+        function addToCart() {
+            const quantityInput = document.getElementById('quantityInput');
+            const quantity = Math.max(parseInt(quantityInput.value, 10) || 1, 1);
+
+            const product = normalizeDraftItem({
+                id: @json($product->id),
+                name: @json($product->name),
+                price: @json($product->price),
+                quantity: quantity,
+                image: getProductImageUrl(),
+                category: @json($product->category->title ?? ''),
+                stock: @json($product->stock ?? 0)
+            });
+
+            const currentOrder = getDraftOrder();
+            const existingIndex = currentOrder.findIndex(item => String(item.id) === String(product.id));
 
             if (existingIndex > -1) {
-                currentOrder[existingIndex].quantity += quantity;
+                currentOrder[existingIndex].quantity += product.quantity;
             } else {
                 currentOrder.push(product);
             }
 
-            localStorage.setItem('herb_order', JSON.stringify(currentOrder));
-            updateBadge();
+            persistCart(currentOrder);
             showToast(`Added ${quantity} item(s) to cart!`);
         }
 
-        
         function buyNow() {
             addToCart();
-            window.location.href = '{{ url("/orders/draft") }}';
+            window.location.href = @json(route('order.draft'));
         }
-
-        -
 
         function changeMainImage(thumbnail) {
             const mainImage = document.getElementById('mainImage');
@@ -1023,15 +1000,34 @@
 
         function decreaseQuantity() {
             const input = document.getElementById('quantityInput');
-            const currentValue = parseInt(input.value);
-            if (currentValue > 1) input.value = currentValue - 1;
+            const currentValue = parseInt(input.value, 10) || 1;
+            if (currentValue > 1) {
+                input.value = currentValue - 1;
+                updateQuantityButtons();
+            }
         }
 
         function increaseQuantity() {
             const input = document.getElementById('quantityInput');
-            const currentValue = parseInt(input.value);
-            const maxValue = parseInt(input.max);
-            if (currentValue < maxValue) input.value = currentValue + 1;
+            const currentValue = parseInt(input.value, 10) || 1;
+            const maxValue = parseInt(input.max, 10) || 1;
+            if (currentValue < maxValue) {
+                input.value = currentValue + 1;
+                updateQuantityButtons();
+            }
+        }
+
+        function updateQuantityButtons() {
+            const input = document.getElementById('quantityInput');
+            const decreaseBtn = document.getElementById('decreaseBtn');
+            const increaseBtn = document.getElementById('increaseBtn');
+            const currentValue = Math.max(parseInt(input.value, 10) || 1, 1);
+            const minValue = parseInt(input.min, 10) || 1;
+            const maxValue = parseInt(input.max, 10) || 1;
+
+            input.value = currentValue;
+            decreaseBtn.disabled = currentValue <= minValue;
+            increaseBtn.disabled = currentValue >= maxValue;
         }
 
         function toggleWishlist(btn) {
@@ -1056,6 +1052,25 @@
             toastContainer.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         }
+
+        window.HerbAtlasDraftCart = window.HerbAtlasDraftCart || {};
+        window.HerbAtlasDraftCart.getDraftCartItems = getDraftOrder;
+        window.HerbAtlasDraftCart.setDraftCartItems = function (items) {
+            persistCart(Array.isArray(items) ? items.map(normalizeDraftItem) : []);
+        };
+        window.HerbAtlasDraftCart.clearDraftCart = function () {
+            localStorage.removeItem(DRAFT_ORDER_KEY);
+            updateBadge();
+            window.HerbAtlasDraftCart.items = [];
+            window.HerbAtlasDraftCart.updateDraftCartBadge?.();
+        };
+        window.HerbAtlasDraftCart.updateDraftCartBadge = updateBadge;
+        window.HerbAtlasDraftCart.storageKey = DRAFT_ORDER_KEY;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            updateBadge();
+            updateQuantityButtons();
+        });
     </script>
 </body>
 </html>

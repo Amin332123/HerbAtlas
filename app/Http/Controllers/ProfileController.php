@@ -60,7 +60,7 @@ class ProfileController extends Controller
         }
 
         $user->update([
-            'password' => $request->new_password
+            'password' => Hash::make($request->new_password)
         ]);
 
         return response()->json([

@@ -10,6 +10,11 @@ class Feedback extends Model
     /** @use HasFactory<\Database\Factories\FeedbackFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'description',
+        'user_id',
+        'product_id',
+    ];
 
     public function user() {
         return $this->belongsTo(User::class);

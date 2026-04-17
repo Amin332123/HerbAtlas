@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
@@ -24,12 +25,14 @@ class AuthController extends Controller
     }
     public function register(RegisterRequest $request)
     {
+        $customerRole = Role::where('status', 'customer')->first();
+
         $user = User::create([
             'firstName' => $request->firstName,
             'lastName' => $request->lastName,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-
+            'role_id' => $customerRole->id,
         ]);
         event(new Registered($user));
         Auth::login($user);
@@ -59,19 +62,25 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials)) {
-
-
-            $request->session()->regenerate();
-
-
-            return redirect()->route('dashboard');
+        if (! Auth::attempt($credentials)) {
+            return back()->withErrors([
+                'email' => 'The provided credentials do not match our records.',
+            ])->onlyInput('email');
         }
 
+        $user = Auth::user();
 
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+        if ($user->is_banned) {
+            Auth::logout();
+
+            return back()->withErrors([
+                'email' => 'Your account has been banned and cannot log in.',
+            ])->onlyInput('email');
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->route('dashboard');
     }
 
 
@@ -91,4 +100,3 @@ class AuthController extends Controller
     }
 
 }
-

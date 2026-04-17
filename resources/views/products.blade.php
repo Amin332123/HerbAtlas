@@ -4,12 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products - Herb Atlas</title>
+        <title>Products - Herb Atlas</title>
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800;900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="user-is-admin" content="{{ auth()->check() && auth()->user()->role_id == 1 ? '1' : '0' }}">
 
     <style>
         :root {
@@ -37,9 +38,10 @@
 
         .card-actions {
             display: grid;
-            grid-template-columns: 33% 33% 33%;
-            gap: 5px;
-            margin-top: 15px;
+            grid-template-columns: 1fr 34px 34px;
+            gap: 10px;
+            margin-top: auto;
+            align-items: center;
         }
 
         .main-content {
@@ -50,58 +52,107 @@
 
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 22px;
+            padding: 0 24px;
+        }
+
+        @media (max-width: 1100px) {
+            .products-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                padding: 0 18px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 18px;
+                padding: 0 12px;
+            }
+
+            .product-card {
+                padding: 10px;
+            }
+
+            .product-image {
+                width: 100%;
+                aspect-ratio: 16 / 10;
+                height: auto;
+                margin: 0 0 8px;
+            }
+
+            .product-card h3 {
+                font-size: 0.95rem;
+            }
+
+            .product-card p {
+                font-size: 0.78rem;
+            }
+
+            .price-tag {
+                font-size: 1rem;
+            }
         }
 
         .product-card {
-            background: white;
-            border-radius: 24px;
-            padding: 25px;
-            box-shadow: 0 8px 25px rgba(102, 191, 191, 0.1);
-            transition: all 0.3s ease;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, #ffffff 100%);
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 10px 24px rgba(102, 191, 191, 0.07);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
             display: flex;
             flex-direction: column;
-            border: 1px solid rgba(102, 191, 191, 0.2);
+            border: 1px solid rgba(102, 191, 191, 0.14);
             backdrop-filter: blur(2px);
+            min-height: 100%;
+            overflow: hidden;
         }
 
         .product-card:hover {
-            transform: translateY(-10px);
-            box-shadow: var(--shadow);
-            border-color: var(--teal);
+            transform: translateY(-6px);
+            box-shadow: 0 18px 40px rgba(102, 191, 191, 0.14);
+            border-color: rgba(102, 191, 191, 0.35);
         }
 
         .product-image {
             width: 100%;
-            height: 240px;
+            aspect-ratio: 16 / 10;
+            height: auto;
             object-fit: cover;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            margin: 0 0 8px;
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.06);
+            display: block;
         }
 
         .product-card h3 {
-            color: var(--teal);
-            font-size: 1.4rem;
+            color: #205e5e;
+            font-size: 0.98rem;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 3px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
         }
 
         .product-card p {
-            font-size: 0.9rem;
+            font-size: 0.78rem;
             color: var(--gray);
-            margin-bottom: 12px;
-            line-height: 1.5;
+            margin-bottom: 8px;
+            line-height: 1.45;
         }
 
         .stock-info {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 5px;
-            margin: 5px 0;
-            font-size: 0.9rem;
-            color: var(--gray);
+            gap: 6px;
+            margin: 0 0 8px;
+            font-size: 0.75rem;
+            color: #64748b;
+            background: #f8fbfb;
+            padding: 6px 9px;
+            border-radius: 999px;
+            width: fit-content;
         }
 
         .stock-info i {
@@ -109,47 +160,49 @@
         }
 
         .price-tag {
-            font-size: 1.5rem;
+            font-size: 0.98rem;
             font-weight: 800;
-            color: var(--coral);
-            margin: 10px 0;
+            color: #f15f7a;
+            margin: 0 0 8px;
+            letter-spacing: -0.02em;
         }
 
         .details-btn {
             flex: 1;
-            padding: 12px;
-            background: var(--teal);
+            padding: 10px 12px;
+            background: linear-gradient(135deg, var(--teal), #82cdcd);
             color: white;
             border: none;
             border-radius: 12px;
             font-weight: 700;
             cursor: pointer;
-            transition: 0.3s;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
+            font-size: 0.82rem;
+            box-shadow: 0 6px 14px rgba(102, 191, 191, 0.18);
         }
 
         .details-btn:hover {
-            background: #5ba8a8;
-            transform: scale(1.02);
-            box-shadow: 0 4px 10px rgba(102, 191, 191, 0.3);
+            background: linear-gradient(135deg, #4f9b9b, #73c4c4);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(102, 191, 191, 0.22);
         }
 
         .edit-btn,
         .delete-btn {
-            width: 45px;
-            height: 45px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 12px;
             border: none;
             cursor: pointer;
-            transition: 0.3s;
-            font-size: 1.1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-size: 1rem;
         }
 
         .edit-btn {
@@ -160,7 +213,8 @@
 
         .edit-btn:hover {
             background: #d4f0f0;
-            transform: scale(1.05);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(102, 191, 191, 0.16);
         }
 
         .delete-btn {
@@ -171,7 +225,8 @@
 
         .delete-btn:hover {
             background: #ffe5e9;
-            transform: scale(1.05);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(247, 107, 138, 0.14);
         }
 
         .toast-container {
@@ -736,6 +791,17 @@
             color: var(--teal);
         }
 
+        .product-card__cart-actions {
+            display: grid;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .product-card__cart-meta {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
         @media (max-width: 850px) {
             .header {
                 padding: 15px 20px;
@@ -766,12 +832,20 @@
                 margin: 20px 20px 0;
             }
         }
+
+        @media (min-width: 1200px) {
+            .products-grid {
+                padding: 0 40px;
+            }
+        }
     </style>
 </head>
 
 <body>
-
     <x-header />
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="user-is-admin" content="{{ auth()->check() && auth()->user()->role_id == 1 ? '1' : '0' }}">
 
     <div class="toast-container" id="toastContainer">
         @if(session('success'))
@@ -783,8 +857,7 @@
         <form method="GET" action="{{ url('/products') }}" class="search-bar-container" id="productsSearchForm">
             <div class="search-input-wrapper">
                 <i class="fas fa-search"></i>
-                <input type="text" name="search" class="search-input" id="searchInput"
-                    placeholder="Search for herbs, remedies, essential oils..." value="{{ request('search') }}" autocomplete="off">
+                <input type="text" name="search" class="search-input" id="searchInput" placeholder="Search for herbs, remedies, essential oils..." value="{{ request('search') }}" autocomplete="off">
             </div>
             <button type="submit" class="search-btn">
                 <i class="fas fa-search"></i> Search
@@ -803,8 +876,10 @@
                     @endforeach
                 </select>
                 <button type="submit" class="filter-btn" id="categoryFilterButton"><i class="fas fa-filter"></i> Apply Category</button>
+                @if(auth()->check() && auth()->user()->role?->status === 'admin')
                 <button type="button" class="filter-btn" onclick="openCreateCategoryModal()"><i class="fas fa-plus"></i> Create Category</button>
                 <button type="button" class="filter-btn" onclick="openManageCategoriesModal()"><i class="fas fa-trash"></i> Manage Categories</button>
+                @endif
             </form>
         </div>
 
@@ -826,57 +901,65 @@
         </div>
     @endif
 
-    <main class="main-content">
-        <div class="products-grid" id="productsGrid">
-            @forelse ($products as $product)
-                <div class="product-card" data-category="{{ $product->category ?? 'medicinal' }}"
-                    data-price="{{ $product->price }}">
+    <main>
+        <section>
+            <div class="products-grid" id="productsGrid">
+                @forelse ($products as $product)
+                    @php
+                        $picture = $product->pictures->first();
+                        $imageUrl = $picture ? asset('storage/' . $picture->img_path) : null;
+                        $stock = (int) ($product->stock ?? 0);
+                        $price = (float) $product->price;
+                    @endphp
+                    <div class="product-card" data-category="{{ $product->category?->title ?? 'medicinal' }}" data-price="{{ $price }}">
+                        @if($imageUrl)
+                            <img src="{{ $imageUrl }}" class="product-image" alt="{{ $product->name }}">
+                        @endif
 
-                    @foreach ($product->pictures as $picture)
-                        <img src="{{ asset('storage/' . $picture->img_path) }}" class="product-image"
-                            alt="{{ $product->name }}">
-                        @break
-                    @endforeach
+                        <div class="product-card__body">
+                            <h3>{{ $product->name }}</h3>
+                            <p>{{ Str::limit($product->description, 72) }}</p>
 
-                    <h3>{{ $product->name }}</h3>
-                    <p>{{ Str::limit($product->description, 60) }}</p>
+                            <div class="stock-info">
+                                <i class="fas fa-boxes"></i> Stock: <strong>{{ $stock }}</strong>
+                            </div>
 
-                    <div class="stock-info">
-                        <i class="fas fa-boxes"></i> Stock: <strong>{{ $product->stock ?? rand(10, 100) }}</strong>
+                            <div class="price-tag">
+                                {{ number_format($price, 2) }} MAD
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <a href="{{ route('product.show', $product->id) }}" class="details-btn">
+                                <i class="fas fa-info-circle"></i> Details
+                            </a>
+
+                            @if (auth()->check() && auth()->user()->role_id == 1)
+                                <a href="{{ route('products.edit', $product->id) }}" class="edit-btn">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <form action="{{ route('products.destroy', $product->id) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="delete-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
                     </div>
-
-                    <div class="price-tag">
-                        {{ $product->price }} MAD
+                @empty
+                    <div class="empty-state">
+                        <i class="fas fa-leaf"></i>
+                        <p>No herbs available. Be the first to add one!</p>
+                        <button onclick="openCreateModal()" class="create-product-btn" style="margin: 0 auto;">
+                            <i class="fas fa-plus-circle"></i> Add Your First Herb
+                        </button>
                     </div>
-
-                    <div class="card-actions">
-                        <a href="{{ url('/products/' . $product->id) }}" class="details-btn">
-                            <i class="fas fa-info-circle"></i> Details
-                        </a>
-
-                        <a href="{{ route('products.edit', $product->id) }}" class="edit-btn">
-                            <i class="fas fa-edit"></i>
-                        </a>
-
-                        <form action="{{ route('products.destroy', $product->id) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="delete-btn">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            @empty
-                <div class="empty-state">
-                    <i class="fas fa-leaf"></i>
-                    <p>No herbs available. Be the first to add one!</p>
-                    <button onclick="openCreateModal()" class="create-product-btn" style="margin: 0 auto;">
-                        <i class="fas fa-plus-circle"></i> Add Your First Herb
-                    </button>
-                </div>
-            @endforelse
-        </div>
+                @endforelse
+            </div>
+        </section>
     </main>
 
     <div class="modal" id="createProductModal">
@@ -890,16 +973,14 @@
                 <p style="color: var(--gray);">Share a new herbal treasure with the world</p>
             </div>
 
-            <form id="createProductForm" action="{{ route('products.store') }}" method="post"
-                onsubmit="handleCreateSubmit(event)" enctype="multipart/form-data">
+            <form id="createProductForm" action="{{ route('products.store') }}" method="post" onsubmit="handleCreateSubmit(event)" enctype="multipart/form-data">
                 @csrf
 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">
                         <i class="fas fa-tag" style="color: var(--teal); margin-right: 5px;"></i>Herb Name *
                     </label>
-                    <input type="text" name="name" id="productName" required
-                        placeholder="e.g., Lavender, Chamomile, Peppermint..." class="form-input">
+                    <input type="text" name="name" id="productName" required placeholder="e.g., Lavender, Chamomile, Peppermint..." class="form-input">
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
@@ -907,15 +988,13 @@
                         <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">
                             <i class="fas fa-boxes" style="color: var(--teal); margin-right: 5px;"></i>Stock Quantity *
                         </label>
-                        <input type="number" name="stock" id="productStock" required min="0" placeholder="e.g., 100"
-                            class="form-input">
+                        <input type="number" name="stock" id="productStock" required min="0" placeholder="e.g., 100" class="form-input">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">
                             <i class="fas fa-coins" style="color: var(--teal); margin-right: 5px;"></i>Price (MAD) *
                         </label>
-                        <input type="number" name="price" id="productPrice" required min="0" step="0.01"
-                            placeholder="e.g., 29.99" class="form-input">
+                        <input type="number" name="price" id="productPrice" required min="0" step="0.01" placeholder="e.g., 29.99" class="form-input">
                     </div>
                 </div>
 
@@ -935,19 +1014,15 @@
                     <label class="form-label">
                         <i class="fas fa-align-left"></i> Description <span style="color: var(--coral);">*</span>
                     </label>
-                    <textarea name="description" id="productDescription" required rows="4"
-                        placeholder="Describe the herb, its benefits, uses, and characteristics..."
-                        class="form-textarea"></textarea>
+                    <textarea name="description" id="productDescription" required rows="4" placeholder="Describe the herb, its benefits, uses, and characteristics..." class="form-textarea"></textarea>
 
                     <div class="ai-generator">
                         <button type="button" class="ai-toggle-btn" onclick="toggleAiInput()">
                             <i class="fas fa-magic"></i> Generate with AI
                         </button>
                         <div class="ai-input-area" id="aiInputArea">
-                            <input type="text" class="ai-prompt-input" id="aiPromptInput"
-                                placeholder="Briefly describe the product (e.g., 'organic lavender oil for relaxation')">
-                            <button type="button" class="ai-generate-btn" id="aiGenerateBtn"
-                                onclick="generateDescription()">
+                            <input type="text" class="ai-prompt-input" id="aiPromptInput" placeholder="Briefly describe the product (e.g., 'organic lavender oil for relaxation')">
+                            <button type="button" class="ai-generate-btn" id="aiGenerateBtn" onclick="generateDescription()">
                                 <i class="fas fa-sparkles"></i> Generate Description
                             </button>
                         </div>
@@ -956,14 +1031,12 @@
 
                 <div class="upload-container" style="margin-bottom: 25px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">
-                        <i class="fas fa-images" style="color: var(--teal); margin-right: 5px;"></i>Herb Images (you can
-                        add multiple)
+                        <i class="fas fa-images" style="color: var(--teal); margin-right: 5px;"></i>Herb Images (you can add multiple)
                     </label>
                     <div id="image-upload-rows">
                         <div class="upload-row" id="upload-row-0">
                             <div class="file-input-wrapper">
-                                <input type="file" name="images[]" accept="image/*" class="image-input"
-                                    onchange="previewImage(this, 0)">
+                                <input type="file" name="images[]" accept="image/*" class="image-input" onchange="previewImage(this, 0)">
                             </div>
                             <div class="preview-wrapper" id="preview-wrapper-0"></div>
                         </div>
@@ -971,8 +1044,7 @@
                     <button type="button" class="add-more-btn" onclick="addImageRow()">
                         <i class="fas fa-plus-circle"></i> Add another image
                     </button>
-                    <p style="font-size: 0.8rem; color: var(--gray); margin-top: 10px;">You can upload multiple images.
-                        Click the remove button to delete a picture.</p>
+                    <p style="font-size: 0.8rem; color: var(--gray); margin-top: 10px;">You can upload multiple images. Click the remove button to delete a picture.</p>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -1001,9 +1073,11 @@
                 @forelse ($categories as $category)
                     <div class="category-card" data-category-id="{{ $category->id }}" data-category-title="{{ $category->title }}">
                         <span class="category-card-name">{{ $category->title }}</span>
+                        @if(auth()->check() && auth()->user()->role?->status === 'admin')
                         <button type="button" class="category-card-delete" onclick="deleteCategory({{ $category->id }}, @js($category->title), this)" aria-label="Delete {{ $category->title }}">
                             <i class="fas fa-trash"></i>
                         </button>
+                        @endif
                     </div>
                 @empty
                     <div class="category-empty-state" id="categoryEmptyState">
@@ -1030,8 +1104,7 @@
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark);">
                         <i class="fas fa-tag" style="color: var(--teal); margin-right: 5px;"></i>Category Title *
                     </label>
-                    <input type="text" name="title" id="categoryTitleInput" required maxlength="80"
-                        placeholder="e.g., Essential Oils" class="form-input">
+                    <input type="text" name="title" id="categoryTitleInput" required maxlength="80" placeholder="e.g., Essential Oils" class="form-input">
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -1047,6 +1120,8 @@
     </div>
 
     <script>
+        const DRAFT_ORDER_KEY = 'herb_draft_cart';
+
         function toggleAiInput() {
             const aiInputArea = document.getElementById('aiInputArea');
             aiInputArea.classList.toggle('active');
@@ -1202,6 +1277,11 @@
 
             initializeProductsAjax();
             initializeCategoryForm();
+            initializeProductDeletion();
+            if (window.HerbAtlasDraftCart) {
+                window.HerbAtlasDraftCart.renderDraftCartFromStorage();
+                window.HerbAtlasDraftCart.updateDraftCartBadge();
+            }
         });
 
         document.getElementById('createProductForm').addEventListener('submit', async function (e) {
@@ -1269,6 +1349,70 @@
             });
         }
 
+        function initializeProductDeletion() {
+            document.getElementById('productsGrid').addEventListener('submit', async function (event) {
+                const form = event.target;
+                if (!form.matches('.product-delete-form')) {
+                    return;
+                }
+
+                event.preventDefault();
+                await deleteProduct(form);
+            });
+        }
+
+        function initializeProductDeletion() {
+            document.getElementById('productsGrid').addEventListener('submit', async function (event) {
+                const form = event.target;
+                if (!form.matches('.product-delete-form')) {
+                    return;
+                }
+
+                event.preventDefault();
+                const button = form.querySelector('button[type="submit"]');
+                const card = form.closest('.product-card');
+
+                try {
+                    if (button) {
+                        button.disabled = true;
+                    }
+
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        },
+                        body: new FormData(form)
+                    });
+
+                    const data = await response.json().catch(() => ({}));
+
+                    if (!response.ok) {
+                        showToast(data.message || 'Unable to delete product', 'error');
+                        return;
+                    }
+
+                    if (card) {
+                        card.remove();
+                    }
+
+                    if (!document.querySelector('#productsGrid .product-card')) {
+                        renderProductsGrid([]);
+                    }
+
+                    showToast(data.message || 'Product deleted successfully');
+                } catch (error) {
+                    showToast('Unable to delete product right now', 'error');
+                } finally {
+                    if (button) {
+                        button.disabled = false;
+                    }
+                }
+            });
+        }
+
         function initializeCategoryForm() {
             const form = document.getElementById('createCategoryForm');
             const titleInput = document.getElementById('categoryTitleInput');
@@ -1292,15 +1436,6 @@
 
                 titleInput.value = normalizedTitle;
             });
-        }
-
-        function getSelectedCategoryTitle() {
-            const select = document.getElementById('categorySelect');
-            return select ? select.value.trim() : '';
-        }
-
-        function deleteSelectedCategory() {
-            showToast('Use the Manage Categories modal to delete categories', 'error');
         }
 
         async function deleteCategory(categoryId, categoryTitle, button = null) {
@@ -1387,6 +1522,53 @@
             }
         }
 
+        async function deleteProduct(form) {
+            const button = form.querySelector('button[type="submit"]');
+            const card = form.closest('.product-card');
+
+            if (!form.action) {
+                return;
+            }
+
+            try {
+                if (button) {
+                    button.disabled = true;
+                }
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: new FormData(form)
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    showToast(data.message || 'Unable to delete product', 'error');
+                    return;
+                }
+
+                if (card) {
+                    card.remove();
+                }
+
+                if (!document.querySelector('#productsGrid .product-card')) {
+                    renderProductsGrid([]);
+                }
+
+                showToast(data.message || 'Product deleted successfully');
+            } catch (error) {
+                showToast('Unable to delete product right now', 'error');
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                }
+            }
+        }
 
         async function fetchProducts() {
             const searchInput = document.getElementById('searchInput');
@@ -1427,6 +1609,8 @@
                 });
 
                 const data = await response.json();
+                window.isAdmin = document.querySelector('meta[name="user-is-admin"]')?.content === '1';
+                window.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
                 if (!response.ok) {
                     renderProductsMessage(getErrorMessage(data), 'error');
@@ -1471,7 +1655,6 @@
 
         function renderProductsGrid(products) {
             const productsGrid = document.getElementById('productsGrid');
-            syncDeletedProductsFromLocalStorage(products);
 
             if (!products.length) {
                 productsGrid.innerHTML = `
@@ -1484,80 +1667,55 @@
             }
 
             productsGrid.innerHTML = products.map(function (product) {
-                const image = product.image ? `<img src="${product.image}" class="product-image" alt="${escapeHtml(product.name)}">` : '';
+                const picture = Array.isArray(product.pictures) && product.pictures.length ? product.pictures[0] : null;
+                const imageUrl = picture && picture.img_path ? `${window.location.origin}/storage/${picture.img_path}` : (product.image || '');
+                const image = imageUrl ? `<img src="${escapeHtml(imageUrl)}" class="product-image" alt="${escapeHtml(product.name)}">` : '';
+                const productName = escapeHtml(product.name || '');
+                const price = Number(product.price ?? 0).toFixed(2);
+                const stock = Number(product.stock ?? 0);
+                const category = escapeHtml(product.category || 'medicinal');
+                const description = escapeHtml(product.description_excerpt || product.description || '');
+                const isAdmin = window.isAdmin;
+                const productId = escapeHtml(String(product.id));
+                const editUrl = escapeHtml(product.edit_url || '#');
+                const deleteUrl = escapeHtml(product.delete_url || '#');
+                const detailsUrl = escapeHtml(product.details_url || '#');
+
                 return `
-                    <div class="product-card" data-category="${escapeHtml(product.category || 'medicinal')}" data-price="${escapeHtml(String(product.price ?? ''))}">
+                    <div class="product-card" data-category="${category}" data-price="${escapeHtml(String(product.price ?? ''))}" data-product-id="${productId}">
                         ${image}
-                        <h3>${escapeHtml(product.name || '')}</h3>
-                        <p>${escapeHtml(product.description_excerpt || product.description || '')}</p>
-                        <div class="stock-info">
-                            <i class="fas fa-boxes"></i> Stock: <strong>${escapeHtml(String(product.stock ?? '0'))}</strong>
+                        <div class="product-card__body">
+                            <h3>${productName}</h3>
+                            <p>${description}</p>
+                            <div class="stock-info">
+                                <i class="fas fa-boxes"></i> Stock: <strong>${escapeHtml(String(stock))}</strong>
+                            </div>
+                            <div class="price-tag">${escapeHtml(price)} MAD</div>
                         </div>
-                        <div class="price-tag">${escapeHtml(String(product.price ?? '0'))} MAD</div>
                         <div class="card-actions">
-                            <a href="${product.details_url}" class="details-btn">
+                            <a href="${detailsUrl}" class="details-btn">
                                 <i class="fas fa-info-circle"></i> Details
                             </a>
-                            <a href="${product.edit_url}" class="edit-btn" onclick="event.preventDefault(); alert('Edit link would go to edit page');">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form action="${product.delete_url}" method="POST">
-                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                <input type="hidden" name="_method" value="DELETE">
-                                <button type="submit" class="delete-btn">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
+                            ${isAdmin ? `
+                                <a href="${editUrl}" class="edit-btn" aria-label="Edit ${productName}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="${deleteUrl}" method="POST" class="product-delete-form">
+                                    <input type="hidden" name="_token" value="${escapeHtml(window.csrfToken || '')}">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <button type="submit" class="delete-btn" aria-label="Delete ${productName}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            ` : ''}
                         </div>
                     </div>
                 `;
             }).join('');
-        }
 
-        function syncDeletedProductsFromLocalStorage(products) {
-            const storageKeys = ['cart', 'cartItems', 'productsCart', 'localCart'];
-            const productIds = new Set(products.map(function (product) {
-                return String(product.id);
-            }));
-            const removedIds = [];
-
-            storageKeys.forEach(function (key) {
-                const raw = localStorage.getItem(key);
-                if (!raw) {
-                    return;
-                }
-
-                try {
-                    const parsed = JSON.parse(raw);
-                    if (!Array.isArray(parsed)) {
-                        return;
-                    }
-
-                    const filtered = parsed.filter(function (item) {
-                        const itemId = String(item?.id ?? item?.product_id ?? item?.productId ?? '');
-                        if (!itemId) {
-                            return true;
-                        }
-
-                        if (productIds.has(itemId)) {
-                            return true;
-                        }
-
-                        removedIds.push(itemId);
-                        return false;
-                    });
-
-                    if (filtered.length !== parsed.length) {
-                        localStorage.setItem(key, JSON.stringify(filtered));
-                    }
-                } catch (error) {
-                    return;
-                }
-            });
-
-            if (removedIds.length > 0) {
-                const uniqueRemovedIds = [...new Set(removedIds)];
-                renderProductsMessage('Removed deleted product(s) from your local storage: ' + uniqueRemovedIds.join(', '), 'success');
+            if (window.HerbAtlasDraftCart) {
+                window.HerbAtlasDraftCart.renderDraftCartFromStorage();
+                window.HerbAtlasDraftCart.updateDraftCartBadge();
             }
         }
 
