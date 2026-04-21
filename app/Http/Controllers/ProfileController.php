@@ -33,13 +33,22 @@ class ProfileController extends Controller
 
     public function updateName(UpdateNameRequest $request)
     {
-
         $user = $request->user();
 
         $user->update([
             'firstName' => $request->firstName,
             'lastName' => $request->lastName,
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Name updated successfully!',
+                'user' => [
+                    'firstName' => $user->firstName,
+                    'lastName' => $user->lastName,
+                ],
+            ]);
+        }
 
         return back()->with('success', 'Name updated successfully!');
     }
