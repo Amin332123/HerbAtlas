@@ -1330,22 +1330,35 @@
             const searchInput = document.getElementById('searchInput');
             const categorySelect = document.getElementById('categorySelect');
 
-            const submitHandler = function (event) {
+            searchForm.addEventListener('submit', function (event) {
+                const submitter = event.submitter || document.activeElement;
+                const isSearchButton = submitter && submitter.classList && submitter.classList.contains('search-btn');
+
+                if (!isSearchButton) {
+                    event.preventDefault();
+                    return;
+                }
+
                 event.preventDefault();
-                fetchProducts();
-            };
+                fetchProducts({
+                    search: searchInput.value.trim(),
+                    category: categorySelect.value.trim()
+                });
+            });
 
-            searchForm.addEventListener('submit', submitHandler);
-            categoryForm.addEventListener('submit', submitHandler);
-
-            let searchTimer = null;
-            searchInput.addEventListener('input', function () {
-                clearTimeout(searchTimer);
-                searchTimer = setTimeout(fetchProducts, 350);
+            categoryForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+                fetchProducts({
+                    search: '',
+                    category: categorySelect.value.trim()
+                });
             });
 
             categorySelect.addEventListener('change', function () {
-                fetchProducts();
+                fetchProducts({
+                    search: '',
+                    category: categorySelect.value.trim()
+                });
             });
         }
 
@@ -1570,15 +1583,15 @@
             }
         }
 
-        async function fetchProducts() {
+        async function fetchProducts(options = {}) {
             const searchInput = document.getElementById('searchInput');
             const categorySelect = document.getElementById('categorySelect');
             const productsGrid = document.getElementById('productsGrid');
             const productsMessage = document.getElementById('productsMessage');
             const productsLoading = document.getElementById('productsLoading');
 
-            const search = searchInput.value.trim();
-            const category = categorySelect.value.trim();
+            const search = typeof options.search === 'string' ? options.search : searchInput.value.trim();
+            const category = typeof options.category === 'string' ? options.category : categorySelect.value.trim();
 
             if (productsRequestController) {
                 productsRequestController.abort();

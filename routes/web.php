@@ -10,7 +10,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Api\AiController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\EnsureUserIsNotBanned;
-
+use App\Http\Controllers\CheckoutController;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -24,6 +24,10 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:10,1')
     ->name('login.store');
+
+Route::view('/order-draft', 'orderDraft')->name('order.draft');
+Route::get('/payment/success/{session}', [CheckoutController::class, 'success'])->name('payment.success');
+Route::get('/payment/cancel', [CheckoutController::class, 'cancel'])->name('payment.cancel');
 
 Route::middleware(['auth', EnsureUserIsNotBanned::class])->group(function () {
     Route::get('/email/verify', [AuthController::class, 'showVerification'])->name('verification.notice');
@@ -51,9 +55,9 @@ Route::middleware(['auth', EnsureUserIsNotBanned::class])->group(function () {
     Route::get('/products/{id}', [ProductController::class, 'show'])->name('product.show');
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-Route::view('/order-draft', 'orderDraft')->name('order.draft');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/checkout', [OrderController::class, 'store'])->name('orders.checkout');
+    Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
     Route::patch('/orders/{order}/items/{product}', [OrderController::class, 'updateItem'])->name('orders.update-item');
     Route::delete('/orders/{order}/items/{product}', [OrderController::class, 'removeItem'])->name('orders.remove-item');
 
@@ -68,3 +72,4 @@ Route::view('/order-draft', 'orderDraft')->name('order.draft');
         Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
     });
 });
+Route::post('/stripe/webhook', [CheckoutController::class, 'webhook'])->name('stripe.webhook');

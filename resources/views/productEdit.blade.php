@@ -373,12 +373,12 @@
             if (input.files && input.files[0]) {
                 const file = input.files[0];
                 if (!file.type.startsWith('image/')) {
-                    alert('Only image files are allowed.');
+                    swal('Only image files are allowed.', "",  "error");
                     input.value = '';
                     return;
                 }
                 if (file.size > 2 * 1024 * 1024) {
-                    alert('Each image must be 2MB or less.');
+                    swal('Each image must be 2MB or less.', "",   "error");
                     input.value = '';
                     return;
                 }
@@ -414,17 +414,17 @@
             const description = document.getElementById('description').value.trim();
 
             if (!name || !stock || !price || !category || !description) {
-                alert('All fields are required.');
+                swal('All fields are required.', "", "error");
                 return false;
             }
 
             if (Number(stock) < 0 || Number.isNaN(Number(stock))) {
-                alert('Stock must be a valid positive number.');
+                swal('Stock must be a valid positive number.',  "",  "error");
                 return false;
             }
 
             if (Number(price) <= 0 || Number.isNaN(Number(price))) {
-                alert('Price must be a valid positive number.');
+                swal('Price must be a valid positive number.', "" ,"error");
                 return false;
             }
 
@@ -433,11 +433,11 @@
                 if (!input.files || !input.files.length) continue;
                 const file = input.files[0];
                 if (!file.type.startsWith('image/')) {
-                    alert('Only image files are allowed.');
+                    swal('Only image files are allowed.',  "", "error");
                     return false;
                 }
                 if (file.size > 2 * 1024 * 1024) {
-                    alert('Each image must be 2MB or less.');
+                    swal('Each image must be 2MB or less.', "", "error");
                     return false;
                 }
             }
@@ -474,12 +474,12 @@
             if (input.files && input.files[0]) {
                 const file = input.files[0];
                 if (!file.type.startsWith('image/')) {
-                    alert('Only image files are allowed.');
+                    swal('Only image files are allowed.', "error");
                     input.value = '';
                     return;
                 }
                 if (file.size > 2 * 1024 * 1024) {
-                    alert('Each image must be 2MB or less.');
+                    swal('Each image must be 2MB or less..', "error");
                     input.value = '';
                     return;
                 }
@@ -507,5 +507,6 @@
             }
         }
     </script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 </body>
 </html>
