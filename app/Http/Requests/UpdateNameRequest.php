@@ -22,8 +22,8 @@ class UpdateNameRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'firstName' => ['required', 'string', 'alpha', 'min:2', 'max:50'],
-            'lastName' => ['required', 'string', 'alpha', 'min:2', 'max:50'],
+            'firstName' => ['required', 'string', 'regex:/^[\pL\s]+$/u', 'min:2', 'max:50'],
+            'lastName' => ['required', 'string', 'regex:/^[\pL\s]+$/u', 'min:2', 'max:50'],
         ];
     }
 

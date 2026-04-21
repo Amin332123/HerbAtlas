@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
 class OrderService
@@ -27,6 +28,72 @@ class OrderService
         return $query;
     }
 
+    public function buildStripeCheckoutPayload(array $items, string $currency = 'usd'): array
+    {
+        $normalizedItems = $this->normalizeItems($items);
+
+        if ($normalizedItems === []) {
+            throw ValidationException::withMessages([
+                'items' => ['Your cart is empty.'],
+            ]);
+        }
+
+        $productIds = array_keys($normalizedItems);
+
+        /** @var Collection<int, Product> $products */
+        $products = Product::query()
+            ->whereIn('id', $productIds)
+            ->get()
+            ->keyBy('id');
+
+        $missingProductIds = array_values(array_diff($productIds, $products->keys()->all()));
+
+        if ($missingProductIds !== []) {
+            throw ValidationException::withMessages([
+                'items' => ['One or more selected products no longer exist.'],
+            ]);
+        }
+
+        $lineItems = [];
+        $metadataItems = [];
+        $totalCents = 0;
+
+        foreach ($normalizedItems as $productId => $item) {
+            /** @var Product $product */
+            $product = $products->get($productId);
+            $quantity = (int) $item['quantity'];
+
+            $this->ensureValidQuantityAndStock($product, $quantity, "items.$productId");
+
+            $unitAmount = $this->convertAmountToCents((float) $product->price);
+
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => strtolower($currency),
+                    'product_data' => [
+                        'name' => $product->name,
+                    ],
+                    'unit_amount' => $unitAmount,
+                ],
+                'quantity' => $quantity,
+            ];
+
+            $metadataItems[] = [
+                'id' => $product->id,
+                'quantity' => $quantity,
+            ];
+
+            $totalCents += $unitAmount * $quantity;
+        }
+
+        return [
+            'line_items' => $lineItems,
+            'items' => array_values($metadataItems),
+            'total_cents' => $totalCents,
+            'currency' => strtolower($currency),
+        ];
+    }
+
     public function createOrder(array $items, int $userId): Order
     {
         $normalizedItems = $this->normalizeItems($items);
@@ -38,22 +105,8 @@ class OrderService
         }
 
         return DB::transaction(function () use ($normalizedItems, $userId) {
-            $productIds = array_keys($normalizedItems);
-
             /** @var Collection<int, Product> $products */
-            $products = Product::query()
-                ->whereIn('id', $productIds)
-                ->lockForUpdate()
-                ->get()
-                ->keyBy('id');
-
-            $missingProductIds = array_values(array_diff($productIds, $products->keys()->all()));
-
-            if ($missingProductIds !== []) {
-                throw ValidationException::withMessages([
-                    'items' => ['One or more selected products no longer exist.'],
-                ]);
-            }
+            $products = $this->loadProductsForItems($normalizedItems, true);
 
             $order = Order::create([
                 'user_id' => $userId,
@@ -73,17 +126,7 @@ class OrderService
                 $product = $products->get($productId);
                 $quantity = (int) $item['quantity'];
 
-                if ($quantity < 1) {
-                    throw ValidationException::withMessages([
-                        "items.$productId" => ['Quantity must be at least 1.'],
-                    ]);
-                }
-
-                if ($product->stock < $quantity) {
-                    throw ValidationException::withMessages([
-                        "items.$productId" => ["The product '{$product->name}' only has {$product->stock} item(s) left in stock."],
-                    ]);
-                }
+                $this->ensureValidQuantityAndStock($product, $quantity, "items.$productId");
 
                 $orderItems[$product->id] = [
                     'quantity' => $quantity,
@@ -91,6 +134,107 @@ class OrderService
                 ];
 
                 $product->decrement('stock', $quantity);
+            }
+
+            $order->products()->attach($orderItems);
+
+            return $this->loadAndTransformOrder($order);
+        });
+    }
+
+    public function createPaidOrder(
+        array $items,
+        int $userId,
+        string $stripeCheckoutSessionId,
+        ?string $stripePaymentIntentId = null,
+        ?int $paidAmountTotal = null
+    ): Order {
+        $normalizedItems = $this->normalizeItems($items);
+
+        if ($normalizedItems === []) {
+            throw ValidationException::withMessages([
+                'items' => ['Your cart is empty.'],
+            ]);
+        }
+
+        return DB::transaction(function () use (
+            $normalizedItems,
+            $userId,
+            $stripeCheckoutSessionId,
+            $stripePaymentIntentId,
+            $paidAmountTotal
+        ) {
+            $hasStatusColumn = Schema::hasColumn('orders', 'status');
+            $hasStripeCheckoutSessionColumn = Schema::hasColumn('orders', 'stripe_checkout_session_id');
+            $hasStripePaymentIntentColumn = Schema::hasColumn('orders', 'stripe_payment_intent_id');
+
+            $existingOrder = $hasStripeCheckoutSessionColumn
+                ? Order::query()
+                    ->where('stripe_checkout_session_id', $stripeCheckoutSessionId)
+                    ->first()
+                : null;
+
+            if ($existingOrder) {
+                return $this->loadAndTransformOrder($existingOrder);
+            }
+
+            /** @var Collection<int, Product> $products */
+            $products = $this->loadProductsForItems($normalizedItems, true);
+
+            $orderItems = [];
+            $calculatedTotalCents = 0;
+
+            foreach ($normalizedItems as $productId => $item) {
+                /** @var Product $product */
+                $product = $products->get($productId);
+                $quantity = (int) $item['quantity'];
+
+                $this->ensureValidQuantityAndStock($product, $quantity, "items.$productId");
+
+                $unitPrice = (float) $product->price;
+                $calculatedTotalCents += $this->convertAmountToCents($unitPrice) * $quantity;
+
+                $orderItems[$product->id] = [
+                    'quantity' => $quantity,
+                    'price' => $unitPrice,
+                ];
+            }
+
+            if ($paidAmountTotal !== null && $paidAmountTotal !== $calculatedTotalCents) {
+                throw ValidationException::withMessages([
+                    'payment' => ['The paid amount does not match the current order total.'],
+                ]);
+            }
+
+            $orderAttributes = [
+                'user_id' => $userId,
+                'name' => 'Order #' . now()->timestamp,
+            ];
+
+            if ($hasStatusColumn) {
+                $orderAttributes['status'] = Order::STATUS_COMPLETED;
+            }
+
+            if ($hasStripeCheckoutSessionColumn) {
+                $orderAttributes['stripe_checkout_session_id'] = $stripeCheckoutSessionId;
+            }
+
+            if ($hasStripePaymentIntentColumn) {
+                $orderAttributes['stripe_payment_intent_id'] = $stripePaymentIntentId;
+            }
+
+            $order = Order::create($orderAttributes);
+
+            if (! $order->name) {
+                $order->forceFill([
+                    'name' => 'Order #' . $order->id,
+                ])->save();
+            }
+
+            foreach ($normalizedItems as $productId => $item) {
+                /** @var Product $product */
+                $product = $products->get($productId);
+                $product->decrement('stock', (int) $item['quantity']);
             }
 
             $order->products()->attach($orderItems);
@@ -207,6 +351,54 @@ class OrderService
         $order->setAttribute('can_modify', $order->status === Order::STATUS_PENDING);
 
         return $order;
+    }
+
+    /**
+     * @param  array<int, array{product_id:int, quantity:int}>  $normalizedItems
+     * @return Collection<int, Product>
+     */
+    protected function loadProductsForItems(array $normalizedItems, bool $lockForUpdate = false): Collection
+    {
+        $productIds = array_keys($normalizedItems);
+
+        $query = Product::query()->whereIn('id', $productIds);
+
+        if ($lockForUpdate) {
+            $query->lockForUpdate();
+        }
+
+        /** @var Collection<int, Product> $products */
+        $products = $query->get()->keyBy('id');
+
+        $missingProductIds = array_values(array_diff($productIds, $products->keys()->all()));
+
+        if ($missingProductIds !== []) {
+            throw ValidationException::withMessages([
+                'items' => ['One or more selected products no longer exist.'],
+            ]);
+        }
+
+        return $products;
+    }
+
+    protected function ensureValidQuantityAndStock(Product $product, int $quantity, string $errorKey = 'items'): void
+    {
+        if ($quantity < 1) {
+            throw ValidationException::withMessages([
+                $errorKey => ['Quantity must be at least 1.'],
+            ]);
+        }
+
+        if ($product->stock < $quantity) {
+            throw ValidationException::withMessages([
+                $errorKey => ["The product '{$product->name}' only has {$product->stock} item(s) left in stock."],
+            ]);
+        }
+    }
+
+    protected function convertAmountToCents(float $amount): int
+    {
+        return (int) round($amount * 100);
     }
 
     /**

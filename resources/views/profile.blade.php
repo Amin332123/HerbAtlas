@@ -486,21 +486,6 @@
 <body>
     <x-header />
     <main class="main-content">
-        @if ($errors->any())
-            <div style="color: #b91c1c; padding: 1rem; margin-bottom: 1rem; text-align: center;">
-                <strong>Whoops! Something went wrong:</strong>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        {{ $error }}
-                        <p id="responseFromBackend"></p>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-        @error('phone')
-            <small style="color: var(--coral); margin-top: 5px;">{{ $message }}</small>
-        @enderror
-
         <p id="responseFromBackend"></p>
         <div class="profile-header">
             <div class="profile-image-container">
@@ -586,22 +571,28 @@
             <div class="modal-card">
                 <h2 class="modal-title">Edit Name</h2>
 
-                <form action="{{ route('profileName.update') }}" method="POST" class="modal-form">
+                <form action="{{ route('profileName.update') }}" method="POST" class="modal-form" id="nameForm">
                     @csrf
                     @method('PUT')
 
                     <div style="display: grid; gap: 10px;">
-                        <input type="text" name="firstName" placeholder="First Name" class="modal-input"
-                            style="flex: 1;" value="{{ $user->firstName }}" required>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <input type="text" name="firstName" placeholder="First Name" class="modal-input"
+                                style="flex: 1;" value="{{ $user->firstName }}" required>
+                            <small class="js-error" id="firstNameError" style="color: var(--coral);"></small>
+                        </div>
 
-                        <input type="text" name="lastName" placeholder="Last Name" class="modal-input" style="flex: 1;"
-                            value="{{ $user->lastName }}" required>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <input type="text" name="lastName" placeholder="Last Name" class="modal-input" style="flex: 1;"
+                                value="{{ $user->lastName }}" required>
+                            <small class="js-error" id="lastNameError" style="color: var(--coral);"></small>
+                        </div>
                     </div>
 
 
                     <div class="modal-actions">
                         <button type="button" class="cancel-btn" onclick="closeModal('nameModal')">Cancel</button>
-                        <button type="submit" class="edit-btn" onclick="showModal('nameModal')">Edit</button>
+                        <button type="submit" class="edit-btn">Edit</button>
                     </div>
                 </form>
             </div>
@@ -742,12 +733,28 @@
 
     <script>
         let iti;
+        function clearNameErrors() {
+            const firstNameError = document.getElementById('firstNameError');
+            const lastNameError = document.getElementById('lastNameError');
+
+            if (firstNameError) {
+                firstNameError.innerHTML = "";
+            }
+
+            if (lastNameError) {
+                lastNameError.innerHTML = "";
+            }
+        }
+
         function showModal(modalId) {
             let PasswordErrors = document.getElementById('PasswordErrors');
             if (PasswordErrors) {
                 PasswordErrors.innerHTML = " ";
             }
 
+            if (modalId === 'nameModal') {
+                clearNameErrors();
+            }
 
             document.getElementById(modalId).style.display = 'flex';
         }
@@ -831,6 +838,70 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
+        const nameForm = document.getElementById('nameForm');
+        if (nameForm) {
+            nameForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                clearNameErrors();
+
+                const firstNameInput = nameForm.querySelector('input[name="firstName"]');
+                const lastNameInput = nameForm.querySelector('input[name="lastName"]');
+                const firstName = firstNameInput.value.trim();
+                const lastName = lastNameInput.value.trim();
+
+                fetch("{{ route('profileName.update') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({
+                        _method: 'PUT',
+                        firstName,
+                        lastName
+                    })
+                })
+                    .then(async response => {
+                        const data = await response.json().catch(() => ({}));
+                        if (!response.ok) {
+                            throw data;
+                        }
+                        return data;
+                    })
+                    .then(data => {
+                        const fullName = `${data.user.firstName} ${data.user.lastName}`;
+                        document.querySelector('.profile-name').textContent = fullName;
+                        const fullNameValue = document.querySelector('.info-value');
+                        if (fullNameValue) {
+                            fullNameValue.textContent = fullName;
+                        }
+                        document.getElementById('responseFromBackend').innerText = data.message;
+                        closeModal('nameModal');
+                        setTimeout(() => {
+                            document.getElementById('responseFromBackend').innerText = "";
+                        }, 3000);
+                    })
+                    .catch(error => {
+                        const errors = error.errors || {};
+
+                        if (errors.firstName && errors.firstName.length) {
+                            document.getElementById('firstNameError').innerText = errors.firstName[0];
+                        }
+
+                        if (errors.lastName && errors.lastName.length) {
+                            document.getElementById('lastNameError').innerText = errors.lastName[0];
+                        }
+
+                        if (!errors.firstName && !errors.lastName) {
+                            const fallbackMessage = error.message || 'An unexpected error occurred.';
+                            document.getElementById('responseFromBackend').innerText = fallbackMessage;
+                        }
+                    });
+            });
+        }
+
 
 
         // password :
@@ -856,7 +927,7 @@
             let new_password_confirmation = document.getElementById('newPasswordConfirmation').value;
 
             if (!regex.test(old_password) || !regex.test(new_password)) {
-                PasswordErrors.innerHTML += `ivalid password or new Password`;
+                PasswordErrors.innerHTML += `invalid password or new Password`;
                 return;
 
             }

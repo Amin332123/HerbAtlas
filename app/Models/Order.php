@@ -18,11 +18,16 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'status',
+        'stripe_checkout_session_id',
+        'stripe_payment_intent_id',
     ];
 
     protected $casts = [
         'user_id' => 'integer',
         'status' => 'string',
+        'stripe_checkout_session_id' => 'string',
+        'stripe_payment_intent_id' => 'string',
     ];
 
     public function user(): BelongsTo

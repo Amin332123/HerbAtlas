@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="checkout-url" content="{{ route('orders.checkout') }}">
+    <meta name="checkout-url" content="{{ route('checkout') }}">
     <meta name="orders-url" content="{{ route('orders.index') }}">
     <style>
         :root {
@@ -579,7 +579,7 @@
                 </div>
                 <div class="summary-row">
                     <span>Subtotal</span>
-                    <strong id="draftCartSubtotal">0.00 MAD</strong>
+                    <strong id="draftCartSubtotal">0.00 USD</strong>
                 </div>
                 <div class="summary-row">
                     <span>Shipping</span>
@@ -588,41 +588,35 @@
 
                 <div class="summary-total">
                     <strong>Total</strong>
-                    <span id="draftCartTotal">0.00 MAD</span>
+                    <span id="draftCartTotal">0.00 USD</span>
                 </div>
 
-                <button type="button" class="btn btn-primary checkout-btn" id="draftCheckoutButton">
+                <button type="button" class="btn btn-primary checkout-btn" id="pay-order-btn">
                     <i class="fas fa-lock"></i>
-                    Checkout securely
+                    Pay & Order
                 </button>
 
                 <div id="draftCheckoutStatus" class="checkout-status" aria-live="polite"></div>
-                <p class="checkout-note">Checkout uses the existing database order creation flow. Local draft data is cleared only after a successful server response.</p>
+                <p class="checkout-note">You will be redirected to Stripe to pay securely. Local draft data is cleared only after Stripe payment is verified on the success page.</p>
             </aside>
         </div>
     </main>
 
-    <form id="draftCheckoutForm" action="{{ route('orders.checkout') }}" method="POST" class="hidden">
-        @csrf
-        <input type="hidden" name="items" id="draftCheckoutItemsField">
-    </form>
-
     <script>
         (function () {
             const DRAFT_ORDER_KEY = 'herb_draft_cart';
-            const checkoutUrl = document.querySelector('meta[name="checkout-url"]')?.content || @json(route('orders.checkout'));
+            const checkoutUrl = document.querySelector('meta[name="checkout-url"]')?.content || @json(route('checkout'));
             const ordersUrl = document.querySelector('meta[name="orders-url"]')?.content || @json(route('orders.index'));
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            const shouldClearCartAfterSuccess = @json((bool) session('clear_draft_cart', false));
             const listEl = document.getElementById('draftCartList');
             const emptyEl = document.getElementById('draftCartEmptyState');
             const itemsCountEl = document.getElementById('draftCartItemsCount');
             const quantityCountEl = document.getElementById('draftCartQuantityCount');
             const subtotalEl = document.getElementById('draftCartSubtotal');
             const totalEl = document.getElementById('draftCartTotal');
-            const checkoutButton = document.getElementById('draftCheckoutButton');
+            const checkoutButton = document.getElementById('pay-order-btn');
             const checkoutStatus = document.getElementById('draftCheckoutStatus');
-            const checkoutForm = document.getElementById('draftCheckoutForm');
-            const checkoutItemsField = document.getElementById('draftCheckoutItemsField');
 
             function escapeHtml(value) {
                 return String(value)
@@ -694,7 +688,7 @@
             }
 
             function formatMoney(value) {
-                return Number(value || 0).toFixed(2) + ' MAD';
+                return Number(value || 0).toFixed(2) + ' USD';
             }
 
             function updateSummary(items) {
@@ -782,13 +776,20 @@
             }
 
             function buildCheckoutPayload(items) {
+                const normalizedItems = items.map(function (item) {
+                    return {
+                        id: item.id,
+                        quantity: Number(item.quantity || 1)
+                    };
+                });
+
+                const totalCents = items.reduce(function (sum, item) {
+                    return sum + Math.round(Number(item.price || 0) * 100) * Number(item.quantity || 0);
+                }, 0);
+
                 return {
-                    items: items.map(function (item) {
-                        return {
-                            id: item.id,
-                            quantity: Number(item.quantity || 1)
-                        };
-                    })
+                    items: normalizedItems,
+                    total: totalCents
                 };
             }
 
@@ -800,10 +801,9 @@
                 }
 
                 checkoutButton.disabled = true;
-                setStatus('Creating your order...', '');
+                setStatus('Creating Stripe checkout session...', '');
 
                 const payload = buildCheckoutPayload(items);
-                checkoutItemsField.value = JSON.stringify(payload.items);
 
                 try {
                     const response = await fetch(checkoutUrl, {
@@ -826,13 +826,18 @@
                         return;
                     }
 
-                    clearCart();
-                    setStatus('Order created successfully. Redirecting...', 'success');
+                    const redirectUrl = data.url || null;
 
-                    const redirectUrl = data.redirect_url || ordersUrl;
+                    if (!redirectUrl) {
+                        setStatus('Stripe checkout URL was not returned.', 'error');
+                        checkoutButton.disabled = false;
+                        return;
+                    }
+
+                    setStatus('Redirecting to Stripe...', 'success');
                     window.location.href = redirectUrl;
                 } catch (error) {
-                    setStatus('Unable to complete checkout right now. Please try again.', 'error');
+                    setStatus('Unable to start Stripe checkout right now. Please try again.', 'error');
                     checkoutButton.disabled = false;
                 }
             }
@@ -932,9 +937,17 @@
 
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', function () {
+                    if (shouldClearCartAfterSuccess) {
+                        clearCart();
+                    }
+
                     renderCart();
                 });
             } else {
+                if (shouldClearCartAfterSuccess) {
+                    clearCart();
+                }
+
                 renderCart();
             }
         })();
